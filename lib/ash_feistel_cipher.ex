@@ -16,23 +16,23 @@ defmodule AshFeistelCipher do
     ],
     bits: [
       type: :integer,
-      default: 62,
+      default: 52,
       doc: """
       The number of bits the source and target will use.
       Must be an even number less than or equal to 62. Cannot be changed after table creation.
-      Default: 62
+      Default is 52 for JavaScript interoperability.
       """
     ],
     bits_confirm: [
       type: :string,
-      default: "0x3E",
+      default: "0x34",
       doc: """
       A string representation of bits in hexadecimal.
-      Example: 40 -> 0x28.
+      Example: bits 40 -> bits_confirm "0x28".
       Since bits must not be changed after table creation,
       bits_confirm is required to prevent errors if bits are changed by mistake,
       for example, through find and replace.
-      Default: 0x3E
+      Default is "0x34" for JavaScript interoperability.
       """
     ]
   ]
