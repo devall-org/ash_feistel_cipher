@@ -60,7 +60,7 @@ defmodule AshFeistelCipher.Transformer do
   end
 
   defp get_db_column_name(attr_name, dsl_state) do
-    %Attribute{type: Ash.Type.Integer, source: db_column_name} =
+    %Attribute{source: db_column_name} =
       dsl_state |> Transformer.get_entities([:attributes]) |> Enum.find(&(&1.name == attr_name))
 
     db_column_name
