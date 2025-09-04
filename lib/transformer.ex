@@ -42,9 +42,8 @@ defmodule AshFeistelCipher.Transformer do
     {^bits, ""} = bits_confirm |> Integer.parse(16)
 
     table = dsl_state |> Transformer.get_option([:postgres], :table)
-    opts = [bits: bits, source: source, target: target]
-    up_sql = FeistelCipher.Migration.up_sql_for_table(table, opts)
-    down_sql = FeistelCipher.Migration.down_sql_for_table(table, opts)
+    up = FeistelCipher.Migration.up_for_encryption(table, source, target, bits)
+    down = FeistelCipher.Migration.down_for_encryption(table, source, target)
 
     {:ok, statement} =
       Transformer.build_entity(
@@ -52,8 +51,8 @@ defmodule AshFeistelCipher.Transformer do
         [:postgres, :custom_statements],
         :statement,
         name: :feistel_cipher,
-        up: up_sql,
-        down: down_sql
+        up: up,
+        down: down
       )
 
     dsl_state |> Transformer.add_entity([:postgres, :custom_statements], statement, type: :append)
