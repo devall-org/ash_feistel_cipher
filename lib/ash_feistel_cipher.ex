@@ -19,7 +19,7 @@ defmodule AshFeistelCipher do
       default: 52,
       doc: """
       The number of bits the source and target will use.
-      Must be an even number less than or equal to 62. Cannot be changed after table creation.
+      Must be an even number less than or equal to 62. Cannot be changed after records are created.
       Default is 52 for JavaScript interoperability.
       """
     ],
@@ -29,6 +29,7 @@ defmodule AshFeistelCipher do
       doc: """
       The encryption key to use for the Feistel cipher.
       If not provided, a key will be derived from the table name, source, target, and bits.
+      Cannot be changed after records are created.
       You can generate a random key using FeistelCipher.random_key().
       """
     ]
@@ -67,7 +68,7 @@ defmodule AshFeistelCipher do
     examples: [
       """
       feistel_cipher do
-        prefix "accounts"
+        functions_prefix "accounts"
 
         encrypt do
           source :seq
@@ -84,7 +85,7 @@ defmodule AshFeistelCipher do
       """
     ],
     schema: [
-      prefix: [
+      functions_prefix: [
         type: :string,
         required: false,
         default: "public",

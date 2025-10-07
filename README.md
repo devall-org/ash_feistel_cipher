@@ -26,7 +26,7 @@ defmodule MyApp.Post do
   end
 
   feistel_cipher do
-    prefix "accounts" # PostgreSQL schema where feistel functions are installed. Default is "public".
+    functions_prefix "accounts" # PostgreSQL schema where feistel functions are installed. Default is "public".
     
     encrypt do
       source :seq # Source attribute for the Feistel cipher.
