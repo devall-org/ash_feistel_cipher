@@ -8,10 +8,12 @@ defmodule AshFeistelCipher.Transformer do
 
   @impl Spark.Dsl.Transformer
   def transform(dsl_state) do
+    prefix = Transformer.get_option(dsl_state, [:feistel_cipher], :prefix)
+
     dsl_state
     |> tap(&validate_unique_target!/1)
     |> Transformer.get_entities([:feistel_cipher])
-    |> Enum.reduce(dsl_state, &add_feistel_cipher_trigger/2)
+    |> Enum.reduce(dsl_state, &add_feistel_cipher_trigger(&1, &2, prefix))
     |> then(fn dsl_state -> {:ok, dsl_state} end)
   end
 
@@ -31,19 +33,17 @@ defmodule AshFeistelCipher.Transformer do
            source: source,
            target: target,
            bits: bits,
-           bits_confirm: bits_confirm
+           key: key
          },
-         dsl_state
+         dsl_state,
+         prefix
        ) do
     source = get_db_column_name(source, dsl_state)
     target = get_db_column_name(target, dsl_state)
 
-    "0x" <> bits_confirm = bits_confirm
-    {^bits, ""} = bits_confirm |> Integer.parse(16)
-
     table = dsl_state |> Transformer.get_option([:postgres], :table)
-    up = FeistelCipher.Migration.up_for_encryption(table, source, target, bits)
-    down = FeistelCipher.Migration.down_for_encryption(table, source, target)
+    up = FeistelCipher.Migration.up_for_encryption(table, source, target, bits: bits, key: key, prefix: prefix)
+    down = FeistelCipher.Migration.down_for_encryption(table, source, target, prefix: prefix)
 
     {:ok, statement} =
       Transformer.build_entity(

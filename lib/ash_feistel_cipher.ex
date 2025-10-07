@@ -1,6 +1,6 @@
 defmodule AshFeistelCipher do
   defmodule Encrypt do
-    defstruct [:source, :target, :bits, :bits_confirm]
+    defstruct [:source, :target, :bits, :key]
   end
 
   @encrypt_schema [
@@ -23,24 +23,13 @@ defmodule AshFeistelCipher do
       Default is 52 for JavaScript interoperability.
       """
     ],
-    bits_confirm: [
-      type: :string,
-      default: "0x34",
-      doc: """
-      A string representation of bits in hexadecimal.
-      Example: bits 40 -> bits_confirm "0x28".
-      Since bits must not be changed after table creation,
-      bits_confirm is required to prevent errors if bits are changed by mistake,
-      for example, through find and replace.
-      Default is "0x34" for JavaScript interoperability.
-      """
-    ],
-    encryption_key: [
+    key: [
       type: :integer,
       required: false,
       doc: """
       The encryption key to use for the Feistel cipher.
       If not provided, a key will be derived from the table name, source, target, and bits.
+      You can generate a random key using FeistelCipher.random_key().
       """
     ]
   ]
@@ -54,7 +43,14 @@ defmodule AshFeistelCipher do
         source :seq
         target :id
         bits 40
-        bits_confirm "0x28"
+      end
+      """,
+      """
+      encrypt do
+        source :seq
+        target :id
+        bits 40
+        key 12345
       end
       """
     ],
@@ -71,21 +67,30 @@ defmodule AshFeistelCipher do
     examples: [
       """
       feistel_cipher do
+        prefix "accounts"
+
         encrypt do
           source :seq
           target :id
           bits 40
-          bits_confirm "0x28"
         end
 
         encrypt do
-          source :other_source
-          target :other_target
+          source :seq
+          target :referrer_code
+          key 67890
         end
       end
       """
     ],
-    schema: [],
+    schema: [
+      prefix: [
+        type: :string,
+        required: false,
+        default: "public",
+        doc: "PostgreSQL schema where feistel cipher functions are installed. Default is 'public' schema."
+      ]
+    ],
     entities: [@encrypt]
   }
 

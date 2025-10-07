@@ -26,15 +26,18 @@ defmodule MyApp.Post do
   end
 
   feistel_cipher do
+    prefix "accounts" # PostgreSQL schema where feistel functions are installed. Default is "public".
+    
     encrypt do
       source :seq # Source attribute for the Feistel cipher.
       target :id # Target attribute for the Feistel cipher.
       bits 40 # Specifies the maximum number of bits for both the source and target integers.
-      bits_confirm "0x28" # A confirmation value to prevent unintentional changes to the 'bits' setting.
     end
 
     encrypt do
-      # You can define multiple 'encrypt' blocks if you need to configure
+      source :seq
+      target :referrer_code
+      key 12345 # Custom encryption key. Generate with FeistelCipher.random_key() or derive automatically.
     end
   end
 end
