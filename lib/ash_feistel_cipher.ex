@@ -1,6 +1,6 @@
 defmodule AshFeistelCipher do
   defmodule Encrypt do
-    defstruct [:source, :target, :bits, :bits_confirm]
+    defstruct [:source, :target, :bits, :key, :__spark_metadata__]
   end
 
   @encrypt_schema [
@@ -19,20 +19,18 @@ defmodule AshFeistelCipher do
       default: 52,
       doc: """
       The number of bits the source and target will use.
-      Must be an even number less than or equal to 62. Cannot be changed after table creation.
+      Must be an even number less than or equal to 62. Cannot be changed after records are created.
       Default is 52 for JavaScript interoperability.
       """
     ],
-    bits_confirm: [
-      type: :string,
-      default: "0x34",
+    key: [
+      type: :integer,
+      required: false,
       doc: """
-      A string representation of bits in hexadecimal.
-      Example: bits 40 -> bits_confirm "0x28".
-      Since bits must not be changed after table creation,
-      bits_confirm is required to prevent errors if bits are changed by mistake,
-      for example, through find and replace.
-      Default is "0x34" for JavaScript interoperability.
+      The encryption key to use for the Feistel cipher.
+      If not provided, a key will be derived from the table name, source, target, and bits.
+      Cannot be changed after records are created.
+      You can generate a random key using FeistelCipher.random_key().
       """
     ]
   ]
@@ -46,7 +44,14 @@ defmodule AshFeistelCipher do
         source :seq
         target :id
         bits 40
-        bits_confirm "0x28"
+      end
+      """,
+      """
+      encrypt do
+        source :seq
+        target :id
+        bits 40
+        key 12345
       end
       """
     ],
@@ -63,21 +68,31 @@ defmodule AshFeistelCipher do
     examples: [
       """
       feistel_cipher do
+        functions_prefix "accounts"
+
         encrypt do
           source :seq
           target :id
           bits 40
-          bits_confirm "0x28"
         end
 
         encrypt do
-          source :other_source
-          target :other_target
+          source :seq
+          target :referral_code
+          key 67890
         end
       end
       """
     ],
-    schema: [],
+    schema: [
+      functions_prefix: [
+        type: :string,
+        required: false,
+        default: "public",
+        doc:
+          "PostgreSQL schema where feistel cipher functions are installed. Default is 'public' schema."
+      ]
+    ],
     entities: [@encrypt]
   }
 
