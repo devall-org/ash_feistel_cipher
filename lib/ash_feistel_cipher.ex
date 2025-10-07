@@ -1,6 +1,6 @@
 defmodule AshFeistelCipher do
   defmodule Encrypt do
-    defstruct [:source, :target, :bits, :key]
+    defstruct [:source, :target, :bits, :key, :__spark_metadata__]
   end
 
   @encrypt_schema [

@@ -39,7 +39,7 @@ defmodule AshFeistelCipher.Transformer do
     target = get_db_column_name(target, dsl_state)
 
     table = dsl_state |> Transformer.get_option([:postgres], :table)
-    prefix = dsl_state |> Transformer.get_option([:postgres], :schema)
+    prefix = dsl_state |> Transformer.get_option([:postgres], :schema) || "public"
     functions_prefix = dsl_state |> Transformer.get_option([:feistel_cipher], :functions_prefix)
 
     up = FeistelCipher.Migration.up_for_encryption(prefix, table, source, target, bits: bits, key: key, functions_prefix: functions_prefix)
