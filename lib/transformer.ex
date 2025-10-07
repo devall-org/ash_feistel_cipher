@@ -11,7 +11,7 @@ defmodule AshFeistelCipher.Transformer do
     dsl_state
     |> tap(&validate_unique_target!/1)
     |> Transformer.get_entities([:feistel_cipher])
-    |> Enum.reduce(dsl_state, &add_feistel_cipher_trigger/2)
+    |> Enum.reduce(dsl_state, &add_feistel_cipher_trigger(&1, &2))
     |> then(fn dsl_state -> {:ok, dsl_state} end)
   end
 
@@ -31,19 +31,25 @@ defmodule AshFeistelCipher.Transformer do
            source: source,
            target: target,
            bits: bits,
-           bits_confirm: bits_confirm
+           key: key
          },
          dsl_state
        ) do
     source = get_db_column_name(source, dsl_state)
     target = get_db_column_name(target, dsl_state)
 
-    "0x" <> bits_confirm = bits_confirm
-    {^bits, ""} = bits_confirm |> Integer.parse(16)
-
     table = dsl_state |> Transformer.get_option([:postgres], :table)
-    up = FeistelCipher.Migration.up_for_encryption(table, source, target, bits)
-    down = FeistelCipher.Migration.down_for_encryption(table, source, target)
+    prefix = dsl_state |> Transformer.get_option([:postgres], :schema) || "public"
+    functions_prefix = dsl_state |> Transformer.get_option([:feistel_cipher], :functions_prefix)
+
+    up =
+      FeistelCipher.Migration.up_for_encryption(prefix, table, source, target,
+        bits: bits,
+        key: key,
+        functions_prefix: functions_prefix
+      )
+
+    down = FeistelCipher.Migration.down_for_encryption(prefix, table, source, target)
 
     {:ok, statement} =
       Transformer.build_entity(
