@@ -34,6 +34,14 @@ defmodule AshFeistelCipher do
       for example, through find and replace.
       Default is "0x34" for JavaScript interoperability.
       """
+    ],
+    encryption_key: [
+      type: :integer,
+      required: false,
+      doc: """
+      The encryption key to use for the Feistel cipher.
+      If not provided, a key will be derived from the table name, source, target, and bits.
+      """
     ]
   ]
 
