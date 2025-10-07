@@ -78,7 +78,7 @@ defmodule AshFeistelCipher do
 
         encrypt do
           source :seq
-          target :referrer_code
+          target :referral_code
           key 67890
         end
       end
