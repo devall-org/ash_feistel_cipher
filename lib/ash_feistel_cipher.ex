@@ -89,7 +89,8 @@ defmodule AshFeistelCipher do
         type: :string,
         required: false,
         default: "public",
-        doc: "PostgreSQL schema where feistel cipher functions are installed. Default is 'public' schema."
+        doc:
+          "PostgreSQL schema where feistel cipher functions are installed. Default is 'public' schema."
       ]
     ],
     entities: [@encrypt]
