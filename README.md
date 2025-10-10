@@ -1,6 +1,6 @@
 # AshFeistelCipher
 
-AshFeistelCipher is an `Ash.Resource` extension for transforming integer attribute values using a [Feistel cipher](https://en.wikipedia.org/wiki/Feistel_cipher). 
+Unpredictable integer IDs for Ash resources - no UUIDs needed 
 
 ## Why Use This?
 
@@ -42,7 +42,7 @@ If you need more control over the installation process, you can install manually
    ```elixir
    def deps do
      [
-       {:ash_feistel_cipher, "~> 0.9.0"}
+       {:ash_feistel_cipher, "~> 0.9.3"}
      ]
    end
    ```
