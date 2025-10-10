@@ -31,7 +31,7 @@ If you need more control over the installation process, you can install manually
    ```elixir
    def deps do
      [
-       {:ash_feistel_cipher, "~> 0.7.0"}
+       {:ash_feistel_cipher, "~> 0.8.0"}
      ]
    end
    ```
@@ -85,7 +85,7 @@ defmodule MyApp.Post do
     encrypt do
       source :seq
       target :referral_code
-      key 12345 # Custom encryption key. Generate with FeistelCipher.random_key() or derive automatically.
+      key 12345 # Custom encryption key (0 to 2^31-1) or derive automatically from attributes.
     end
   end
 end
