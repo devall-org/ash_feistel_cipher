@@ -1,6 +1,6 @@
 defmodule AshFeistelCipher do
   defmodule Encrypt do
-    defstruct [:source, :target, :bits, :rounds, :key, :__spark_metadata__]
+    defstruct [:source, :target, :bits, :key, :rounds, :__spark_metadata__]
   end
 
   @encrypt_schema [
@@ -23,16 +23,6 @@ defmodule AshFeistelCipher do
       Default is 52 for JavaScript interoperability.
       """
     ],
-    rounds: [
-      type: :integer,
-      default: 16,
-      doc: """
-      Number of Feistel rounds (1-32).
-      More rounds = more secure but slower.
-      Default is 16 for good security/performance balance.
-      Cannot be changed after records are created.
-      """
-    ],
     key: [
       type: :integer,
       required: false,
@@ -41,6 +31,16 @@ defmodule AshFeistelCipher do
       If not provided, a key will be derived from the table name, source, target, and bits.
       Cannot be changed after records are created.
       You can generate a random key using FeistelCipher.random_key().
+      """
+    ],
+    rounds: [
+      type: :integer,
+      default: 16,
+      doc: """
+      Number of Feistel rounds (1-32).
+      More rounds = more secure but slower.
+      Default is 16 for good security/performance balance.
+      Cannot be changed after records are created.
       """
     ]
   ]
@@ -61,8 +61,8 @@ defmodule AshFeistelCipher do
         source :seq
         target :id
         bits 40
-        rounds 8
         key 12345
+        rounds 8
       end
       """
     ],
@@ -85,14 +85,13 @@ defmodule AshFeistelCipher do
           source :seq
           target :id
           bits 40
-          rounds 16
         end
 
         encrypt do
           source :seq
           target :referral_code
-          rounds 8
           key 67890
+          rounds 8
         end
       end
       """
