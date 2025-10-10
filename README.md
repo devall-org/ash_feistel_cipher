@@ -9,7 +9,7 @@ Unpredictable integer IDs for Ash resources - no UUIDs needed
 - Users can enumerate all resources (`/posts/1`, `/posts/2`...)
 - Total record counts are publicly visible
 
-**Solution**: This library uses a [Feistel cipher](https://en.wikipedia.org/wiki/Feistel_cipher) to transform sequential integers into non-sequential, unpredictable values. You keep a sequential column for ordering, and an encrypted column as the primary key. Only the encrypted ID is exposed in APIs and URLs. The transformation is deterministic, reversible, and automatically handled via database triggers integrated with Ash.
+**Solution**: This library uses a [Feistel cipher](https://en.wikipedia.org/wiki/Feistel_cipher) to transform sequential integers into non-sequential, unpredictable values. You keep a sequential column for ordering, and an encrypted column as the primary key. Only the encrypted ID is exposed in APIs and URLs. The transformation is deterministic, collision-free, and automatically handled via database triggers integrated with Ash.
 
 For more details on the algorithm and implementation, see [feistel_cipher](https://github.com/devall-org/feistel_cipher).
 
