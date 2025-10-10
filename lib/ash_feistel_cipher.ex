@@ -1,6 +1,6 @@
 defmodule AshFeistelCipher do
   defmodule Encrypt do
-    defstruct [:source, :target, :bits, :key, :__spark_metadata__]
+    defstruct [:source, :target, :bits, :rounds, :key, :__spark_metadata__]
   end
 
   @encrypt_schema [
@@ -21,6 +21,16 @@ defmodule AshFeistelCipher do
       The number of bits the source and target will use.
       Must be an even number less than or equal to 62. Cannot be changed after records are created.
       Default is 52 for JavaScript interoperability.
+      """
+    ],
+    rounds: [
+      type: :integer,
+      default: 16,
+      doc: """
+      Number of Feistel rounds (1-32).
+      More rounds = more secure but slower.
+      Default is 16 for good security/performance balance.
+      Cannot be changed after records are created.
       """
     ],
     key: [
@@ -51,6 +61,7 @@ defmodule AshFeistelCipher do
         source :seq
         target :id
         bits 40
+        rounds 8
         key 12345
       end
       """
@@ -74,11 +85,13 @@ defmodule AshFeistelCipher do
           source :seq
           target :id
           bits 40
+          rounds 16
         end
 
         encrypt do
           source :seq
           target :referral_code
+          rounds 8
           key 67890
         end
       end

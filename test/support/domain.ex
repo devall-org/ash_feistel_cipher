@@ -1,6 +1,6 @@
 defmodule AshFeistelCipher.Test.Domain do
   @moduledoc false
-  use Ash.Domain
+  use Ash.Domain, otp_app: :ash_feistel_cipher
 
   resources do
     resource(AshFeistelCipher.Test.ValidResource)
@@ -10,5 +10,6 @@ defmodule AshFeistelCipher.Test.Domain do
     resource(AshFeistelCipher.Test.CustomSourceResource)
     resource(AshFeistelCipher.Test.CustomFunctionsPrefixResource)
     resource(AshFeistelCipher.Test.CustomSchemaResource)
+    resource(AshFeistelCipher.Test.CustomRoundsResource)
   end
 end

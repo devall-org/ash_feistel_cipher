@@ -31,7 +31,7 @@ If you need more control over the installation process, you can install manually
    ```elixir
    def deps do
      [
-       {:ash_feistel_cipher, "~> 0.8.0"}
+       {:ash_feistel_cipher, "~> 0.9.0"}
      ]
    end
    ```
@@ -80,11 +80,13 @@ defmodule MyApp.Post do
       source :seq # Source attribute for the Feistel cipher.
       target :id # Target attribute for the Feistel cipher.
       bits 40 # Specifies the maximum number of bits for both the source and target integers.
+      rounds 16 # Number of Feistel rounds (1-32). Default is 16 for good security/performance balance.
     end
 
     encrypt do
       source :seq
       target :referral_code
+      rounds 8 # Fewer rounds for faster encryption if security requirements are lower.
       key 12345 # Custom encryption key (0 to 2^31-1) or derive automatically from attributes.
     end
   end
