@@ -86,7 +86,6 @@ defmodule MyApp.Post do
       source :seq
       target :referral_code
       key 12345 # Custom encryption key (0 to 2^31-1) or derive automatically from attributes.
-      rounds 8 # Fewer rounds for faster encryption if security requirements are lower. Default is 16.
     end
   end
 end
