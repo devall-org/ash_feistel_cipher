@@ -80,6 +80,26 @@ defmodule AshFeistelCipher.TransformerTest do
       assert statement.up =~ "999888777"
     end
 
+    test "applies custom rounds configuration" do
+      statements = get_custom_statements(AshFeistelCipher.Test.CustomRoundsResource)
+
+      assert length(statements) == 1
+      [statement] = statements
+
+      # Should have rounds parameter (8)
+      assert statement.up =~ ", 8)"
+    end
+
+    test "uses default rounds (16) when not specified" do
+      statements = get_custom_statements(AshFeistelCipher.Test.ValidResource)
+
+      assert length(statements) == 1
+      [statement] = statements
+
+      # Should have default rounds (16)
+      assert statement.up =~ ", 16)"
+    end
+
     test "applies custom functions_prefix configuration" do
       statements = get_custom_statements(AshFeistelCipher.Test.CustomFunctionsPrefixResource)
 
