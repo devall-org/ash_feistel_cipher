@@ -4,9 +4,57 @@ AshFeistelCipher is an `Ash.Resource` extension for transforming integer attribu
 
 ## Installation
 
-```
+### Using igniter (Recommended)
+
+```bash
 mix igniter.install ash_feistel_cipher
 ```
+
+You can customize the installation with the following options:
+
+* `--repo` or `-r`: Specify an Ecto repo for FeistelCipher to use.
+* `--functions-prefix` or `-p`: Specify the PostgreSQL schema prefix where the FeistelCipher functions will be created, defaults to `public`.
+* `--functions-salt` or `-s`: Specify the constant value used in the Feistel cipher algorithm. Changing this value will result in different cipher outputs for the same input, should be less than 2^31, defaults to `1_076_943_109`.
+
+Example with custom options:
+
+```bash
+mix igniter.install ash_feistel_cipher --functions-prefix accounts --functions-salt 123456789
+```
+
+### Manual Installation
+
+If you need more control over the installation process, you can install manually:
+
+1. Add `ash_feistel_cipher` to your list of dependencies in `mix.exs`:
+
+   ```elixir
+   def deps do
+     [
+       {:ash_feistel_cipher, "~> 0.7.0"}
+     ]
+   end
+   ```
+
+2. Fetch the dependencies:
+
+   ```bash
+   mix deps.get
+   ```
+
+3. Install FeistelCipher separately with custom options if needed:
+
+   ```bash
+   mix igniter.install feistel_cipher --repo MyApp.Repo --functions-prefix accounts
+   ```
+
+4. Add `:ash_feistel_cipher` to your formatter configuration in `.formatter.exs`:
+
+   ```elixir
+   [
+     import_deps: [:ash_feistel_cipher]
+   ]
+   ```
 
 ## Usage
 
