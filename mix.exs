@@ -4,7 +4,7 @@ defmodule AshFeistelCipher.MixProject do
   def project do
     [
       app: :ash_feistel_cipher,
-      version: "0.9.0",
+      version: "0.9.3",
       elixir: "~> 1.17",
       consolidate_protocols: Mix.env() not in [:dev, :test],
       start_permanent: Mix.env() == :prod,
@@ -48,8 +48,7 @@ defmodule AshFeistelCipher.MixProject do
       maintainers: ["Jechol Lee"],
       links: %{
         "GitHub" => "https://github.com/devall-org/ash_feistel_cipher"
-      },
-      files: ~w(lib mix.exs README.md LICENSE)
+      }
     ]
   end
 end
