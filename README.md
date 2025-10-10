@@ -85,7 +85,7 @@ defmodule MyApp.Post do
     encrypt do
       source :seq
       target :referral_code
-      key 12345 # Custom encryption key. Generate with FeistelCipher.random_key() or derive automatically.
+      key 12345 # Custom encryption key (0 to 2^31-1) or derive automatically from attributes.
     end
   end
 end
