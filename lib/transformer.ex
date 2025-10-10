@@ -43,13 +43,13 @@ defmodule AshFeistelCipher.Transformer do
     functions_prefix = dsl_state |> Transformer.get_option([:feistel_cipher], :functions_prefix)
 
     up =
-      FeistelCipher.Migration.up_for_encryption(prefix, table, source, target,
+      FeistelCipher.up_for_trigger(prefix, table, source, target,
         bits: bits,
         key: key,
         functions_prefix: functions_prefix
       )
 
-    down = FeistelCipher.Migration.down_for_encryption(prefix, table, source, target)
+    down = FeistelCipher.down_for_trigger(prefix, table, source, target)
 
     {:ok, statement} =
       Transformer.build_entity(

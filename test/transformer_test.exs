@@ -181,7 +181,7 @@ defmodule AshFeistelCipher.TransformerTest do
     end
   end
 
-  describe "integration with FeistelCipher.Migration" do
+  describe "integration with FeistelCipher" do
     test "uses correct encryption key generation" do
       statements = get_custom_statements(AshFeistelCipher.Test.ValidResource)
 
