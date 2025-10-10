@@ -1,6 +1,17 @@
 # AshFeistelCipher
 
-AshFeistelCipher is an `Ash.Resource` extension for transforming integer attribute values using a Feistel cipher. This enables the generation of non-sequential, unpredictable values from sequential or otherwise predictable integer inputs.
+AshFeistelCipher is an `Ash.Resource` extension for transforming integer attribute values using a [Feistel cipher](https://en.wikipedia.org/wiki/Feistel_cipher). 
+
+## Why Use This?
+
+**Problem**: Sequential IDs (1, 2, 3...) expose sensitive business information:
+- Competitors can track your growth rate by checking IDs over time
+- Users can enumerate all resources (`/posts/1`, `/posts/2`...)
+- Total record counts are publicly visible
+
+**Solution**: This library uses a [Feistel cipher](https://en.wikipedia.org/wiki/Feistel_cipher) to transform sequential integers into non-sequential, unpredictable values. You keep a sequential column for ordering, and an encrypted column as the primary key. Only the encrypted ID is exposed in APIs and URLs. The transformation is deterministic, reversible, and automatically handled via database triggers integrated with Ash.
+
+For more details on the algorithm and implementation, see [feistel_cipher](https://github.com/devall-org/feistel_cipher).
 
 ## Installation
 
@@ -99,9 +110,9 @@ mix ash.codegen create_post
 
 will generate a migration that sets up a database trigger to encrypt the `seq` attribute into the `id` attribute using a Feistel cipher.
 
-## See Also
+## Related Projects
 
-* [feistel_cipher](https://github.com/devall-org/feistel_cipher): Provides Ecto migrations for Feistel cipher. `ash_feistel_cipher` integrates this capability into the Ash framework for easy use with Ash resources.
+* [feistel_cipher](https://github.com/devall-org/feistel_cipher): The underlying library that provides Ecto migrations and PostgreSQL functions for Feistel cipher operations. `ash_feistel_cipher` builds on top of this to integrate the capability seamlessly into the Ash framework.
 
 ## License
 
