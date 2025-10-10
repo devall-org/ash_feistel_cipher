@@ -3,6 +3,7 @@ spark_locals_without_parens = [
   encrypt: 1,
   functions_prefix: 1,
   key: 1,
+  rounds: 1,
   source: 1,
   target: 1
 ]
