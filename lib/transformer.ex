@@ -31,7 +31,8 @@ defmodule AshFeistelCipher.Transformer do
            source: source,
            target: target,
            bits: bits,
-           key: key
+           key: key,
+           rounds: rounds
          },
          dsl_state
        ) do
@@ -46,6 +47,7 @@ defmodule AshFeistelCipher.Transformer do
       FeistelCipher.up_for_trigger(prefix, table, source, target,
         bits: bits,
         key: key,
+        rounds: rounds,
         functions_prefix: functions_prefix
       )
 

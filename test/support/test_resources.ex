@@ -188,3 +188,29 @@ defmodule AshFeistelCipher.Test.CustomSchemaResource do
     end
   end
 end
+
+defmodule AshFeistelCipher.Test.CustomRoundsResource do
+  @moduledoc false
+  use Ash.Resource,
+    domain: AshFeistelCipher.Test.Domain,
+    data_layer: AshPostgres.DataLayer,
+    extensions: [AshFeistelCipher]
+
+  postgres do
+    table("custom_rounds_resources")
+    repo(AshFeistelCipher.Test.Repo)
+  end
+
+  attributes do
+    integer_primary_key(:seq)
+    attribute(:id, :integer)
+  end
+
+  feistel_cipher do
+    encrypt do
+      source(:seq)
+      target(:id)
+      rounds(8)
+    end
+  end
+end
