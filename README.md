@@ -78,26 +78,66 @@ defmodule MyApp.Post do
     extensions: [AshFeistelCipher]
 
   attributes do
-    attribute :id, :integer, allow_nil?: false, primary_key?: true
-    attribute :referral_code, :integer
-
-    feistel_cipher_source :seq
+    # Option 1: Use integer_sequence for auto-generated bigserial column
+    integer_sequence :seq
+    feistel_cipher_target :id, primary_key?: true, allow_nil?: false
+    feistel_cipher_target :referral_code, allow_nil?: false
+    
+    # Option 2: Use nullable integer_sequence (if you need to allow updates to nil)
+    # integer_sequence :optional_seq, allow_nil?: true
+    # feistel_cipher_target :optional_id, allow_nil?: true
+    
+    # Option 3: Use regular integer attribute as source
+    # attribute :custom_seq, :integer, allow_nil?: false
+    # feistel_cipher_target :custom_id, allow_nil?: false
   end
 
   feistel_cipher do
     functions_prefix "accounts" # PostgreSQL schema where feistel functions are installed. Default is "public".
     
     encrypt do
-      source :seq # Source attribute for the Feistel cipher.
-      target :id # Target attribute for the Feistel cipher.
+      source :seq # Source can be any integer attribute (integer_sequence or regular integer)
+      target :id # Target attribute for the encrypted value
       bits 40 # Specifies the maximum number of bits for both the source and target integers.
     end
 
     encrypt do
-      source :seq
+      source :seq # Multiple encrypts can share the same source
       target :referral_code
       key 12345 # Custom encryption key (0 to 2^31-1) or derive automatically from attributes.
     end
+  end
+end
+```
+
+### Understanding Source Attributes
+
+The `source` in an `encrypt` block can be **any integer attribute**:
+
+- **`integer_sequence`**: A convenience utility that declares an auto-generated bigserial column (similar to `AUTO_INCREMENT` or `SERIAL`). While the value is auto-generated on insert, you can specify `allow_nil?: true` if you need to allow updates that set the value to nil.
+- **Regular integer attributes**: You can use any integer attribute as the source, whether it's manually assigned or generated through other means. The attribute just needs to be of type `:integer`. **Both nullable (`allow_nil?: true`) and non-nullable columns are supported**.
+
+Example with custom source:
+```elixir
+attributes do
+  # Non-nullable source
+  attribute :my_number, :integer, allow_nil?: false
+  feistel_cipher_target :encrypted_number, allow_nil?: false
+  
+  # Nullable source
+  attribute :optional_number, :integer, allow_nil?: true
+  feistel_cipher_target :optional_encrypted, allow_nil?: true
+end
+
+feistel_cipher do
+  encrypt do
+    source :my_number
+    target :encrypted_number
+  end
+  
+  encrypt do
+    source :optional_number
+    target :optional_encrypted
   end
 end
 ```
@@ -109,6 +149,43 @@ mix ash.codegen create_post
 ```
 
 will generate a migration that sets up a database trigger to encrypt the `seq` attribute into the `id` attribute using a Feistel cipher.
+
+### Key Concepts
+
+- **`integer_sequence`**: A convenience helper that creates an auto-incrementing bigserial column. Use this when you want a sequential source column that automatically increments. You can set `allow_nil?: true` if you need to allow updates that set the value to nil.
+
+- **`feistel_cipher_target`**: A convenience helper that creates an integer column with `writable?: false` and `generated?: true`. Use this for encrypted output columns. You should set `allow_nil?` to match your source attribute's nullability. **Important**: When you use `feistel_cipher_target`, you must add a corresponding `encrypt` block - otherwise you'll get a compilation error.
+
+- **Nullable columns**: Both `integer_sequence` and regular integer attributes support `allow_nil?: true`. When your source allows nil, the target should also allow nil.
+
+- **`source` in `encrypt` block**: Can be any integer attribute - not limited to `integer_sequence`. You can use any integer column as the source for encryption.
+
+- **Multiple encrypts from same source**: You can encrypt the same source value into multiple different targets with different encryption keys for different use cases (e.g., public IDs and referral codes).
+
+### Validation
+
+The library includes a verifier that ensures every `feistel_cipher_target` attribute has a corresponding `encrypt` configuration. This prevents the common mistake of declaring a target attribute but forgetting to configure its encryption:
+
+```elixir
+# ❌ This will raise a compilation error:
+attributes do
+  integer_sequence :seq
+  feistel_cipher_target :id  # Missing encrypt configuration!
+end
+
+# ✅ This is correct:
+attributes do
+  integer_sequence :seq
+  feistel_cipher_target :id
+end
+
+feistel_cipher do
+  encrypt do
+    source :seq
+    target :id
+  end
+end
+```
 
 ## Related Projects
 
