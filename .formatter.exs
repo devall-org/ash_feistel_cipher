@@ -1,6 +1,7 @@
 spark_locals_without_parens = [
   bits: 1,
   encrypt: 1,
+  feistel_cipher_source: 1,
   functions_prefix: 1,
   key: 1,
   rounds: 1,
