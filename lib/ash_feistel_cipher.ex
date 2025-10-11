@@ -7,12 +7,18 @@ defmodule AshFeistelCipher do
     source: [
       type: :atom,
       required: true,
-      doc: "Source attribute for feistel cipher"
+      doc: """
+      Source attribute for feistel cipher. Can be any integer attribute.
+      Use `integer_sequence` for an auto-generated bigserial column, or use any regular integer attribute.
+      """
     ],
     target: [
       type: :atom,
       required: true,
-      doc: "Target attribute for feistel cipher"
+      doc: """
+      Target attribute for the encrypted value.
+      Use `feistel_cipher_target` to automatically declare this attribute with the correct settings.
+      """
     ],
     bits: [
       type: :integer,
@@ -108,27 +114,66 @@ defmodule AshFeistelCipher do
     entities: [@encrypt]
   }
 
-  @feistel_cipher_source %Spark.Dsl.Entity{
-    name: :feistel_cipher_source,
-    describe: "Declares an auto-generated integer sequence column for Feistel cipher encryption.",
-    examples: ["feistel_cipher_source :seq"],
+  @integer_sequence %Spark.Dsl.Entity{
+    name: :integer_sequence,
+    describe: """
+    Declares an auto-generated bigserial column.
+    This is a convenience utility - you can also use any regular integer attribute (including nullable ones with `allow_nil?: true`) as a source for Feistel cipher encryption.
+    """,
+    examples: [
+      "integer_sequence :seq",
+      "integer_sequence :seq, allow_nil?: true"
+    ],
     args: [:name],
     target: Ash.Resource.Attribute,
     schema:
-      Ash.Resource.Attribute.integer_primary_key_schema()
-      |> Spark.Options.Helpers.set_default!(:primary_key?, false)
-      |> Spark.Options.Helpers.set_default!(:public?, false),
-    auto_set_fields: [allow_nil?: false],
+      Ash.Resource.Attribute.attribute_schema()
+      |> Spark.Options.Helpers.set_default!(:type, :integer)
+      |> Spark.Options.Helpers.set_default!(:generated?, true),
     transform: {Ash.Resource.Attribute, :transform, []}
   }
 
-  @feistel_cipher_source_patch %Spark.Dsl.Patch.AddEntity{
+  @integer_sequence_patch %Spark.Dsl.Patch.AddEntity{
     section_path: [:attributes],
-    entity: @feistel_cipher_source
+    entity: @integer_sequence
+  }
+
+  def mark_as_feistel_target(attribute) do
+    # First run the standard Ash attribute transform
+    with {:ok, attribute} <- Ash.Resource.Attribute.transform(attribute) do
+      # Then add our marker
+      {:ok, Map.put(attribute, :__feistel_cipher_target__, true)}
+    end
+  end
+
+  @feistel_cipher_target %Spark.Dsl.Entity{
+    name: :feistel_cipher_target,
+    describe: """
+    Declares an encrypted integer column for Feistel cipher.
+    This is a convenience utility that sets writable?: false and generated?: true automatically.
+    """,
+    examples: [
+      "feistel_cipher_target :id, primary_key?: true",
+      "feistel_cipher_target :referral_code",
+      "feistel_cipher_target :optional_id, allow_nil?: true"
+    ],
+    args: [:name],
+    target: Ash.Resource.Attribute,
+    schema:
+      Ash.Resource.Attribute.attribute_schema()
+      |> Spark.Options.Helpers.set_default!(:writable?, false)
+      |> Spark.Options.Helpers.set_default!(:generated?, true)
+      |> Spark.Options.Helpers.set_default!(:type, :integer),
+    transform: {__MODULE__, :mark_as_feistel_target, []}
+  }
+
+  @feistel_cipher_target_patch %Spark.Dsl.Patch.AddEntity{
+    section_path: [:attributes],
+    entity: @feistel_cipher_target
   }
 
   use Spark.Dsl.Extension,
     sections: [@feistel_cipher],
-    dsl_patches: [@feistel_cipher_source_patch],
+    dsl_patches: [@integer_sequence_patch, @feistel_cipher_target_patch],
     transformers: [AshFeistelCipher.Transformer]
 end
