@@ -74,17 +74,17 @@ defmodule AshFeistelCipher do
     bits: [
       type: :integer,
       default: 52,
-      doc: "The number of bits the source and target will use. Must be an even number less than or equal to 62. Cannot be changed after records are created. Default is 52 for JavaScript interoperability."
+      doc: "The number of bits the source and target will use. Must be an even number between 2 and 62. Cannot be changed after records are created. Default is 52 for JavaScript interoperability."
     ],
     key: [
       type: :integer,
       required: false,
-      doc: "The encryption key to use for the Feistel cipher. If not provided, a key will be derived from the table name, source, target, and bits. Cannot be changed after records are created. You can generate a random key using FeistelCipher.random_key()."
+      doc: "The encryption key to use for the Feistel cipher. Must be between 0 and 2^31-1 (2,147,483,647). If not provided, a key will be derived from the table name, source, target, and bits. Cannot be changed after records are created. You can generate a random key using FeistelCipher.random_key()."
     ],
     rounds: [
       type: :integer,
       default: 16,
-      doc: "Number of Feistel rounds (1-32). More rounds = more secure but slower. Default is 16 for good security/performance balance. Cannot be changed after records are created."
+      doc: "Number of Feistel rounds. Must be between 1 and 32. More rounds = more secure but slower. Default is 16 for good security/performance balance. Cannot be changed after records are created."
     ],
     functions_prefix: [
       type: :string,
