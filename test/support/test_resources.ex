@@ -6,8 +6,8 @@ defmodule AshFeistelCipher.Test.ValidResource do
     extensions: [AshFeistelCipher]
 
   postgres do
-    table("valid_resources")
-    repo(AshFeistelCipher.Test.Repo)
+    table "valid_resources"
+    repo AshFeistelCipher.Test.Repo
   end
 
   attributes do
@@ -18,8 +18,8 @@ defmodule AshFeistelCipher.Test.ValidResource do
 
   feistel_cipher do
     encrypt do
-      source(:seq)
-      target(:id)
+      source :seq
+      target :id
     end
   end
 end
@@ -32,8 +32,8 @@ defmodule AshFeistelCipher.Test.MultipleEncryptsResource do
     extensions: [AshFeistelCipher]
 
   postgres do
-    table("multiple_encrypts")
-    repo(AshFeistelCipher.Test.Repo)
+    table "multiple_encrypts"
+    repo AshFeistelCipher.Test.Repo
   end
 
   attributes do
@@ -45,16 +45,16 @@ defmodule AshFeistelCipher.Test.MultipleEncryptsResource do
 
   feistel_cipher do
     encrypt do
-      source(:seq)
-      target(:id)
-      bits(52)
+      source :seq
+      target :id
+      bits 52
     end
 
     encrypt do
-      source(:seq)
-      target(:referral_code)
-      bits(40)
-      key(12345)
+      source :seq
+      target :referral_code
+      bits 40
+      key 12345
     end
   end
 end
@@ -67,8 +67,8 @@ defmodule AshFeistelCipher.Test.CustomBitsResource do
     extensions: [AshFeistelCipher]
 
   postgres do
-    table("custom_bits_resources")
-    repo(AshFeistelCipher.Test.Repo)
+    table "custom_bits_resources"
+    repo AshFeistelCipher.Test.Repo
   end
 
   attributes do
@@ -78,9 +78,9 @@ defmodule AshFeistelCipher.Test.CustomBitsResource do
 
   feistel_cipher do
     encrypt do
-      source(:seq)
-      target(:id)
-      bits(40)
+      source :seq
+      target :id
+      bits 40
     end
   end
 end
@@ -93,8 +93,8 @@ defmodule AshFeistelCipher.Test.CustomKeyResource do
     extensions: [AshFeistelCipher]
 
   postgres do
-    table("custom_key_resources")
-    repo(AshFeistelCipher.Test.Repo)
+    table "custom_key_resources"
+    repo AshFeistelCipher.Test.Repo
   end
 
   attributes do
@@ -104,9 +104,9 @@ defmodule AshFeistelCipher.Test.CustomKeyResource do
 
   feistel_cipher do
     encrypt do
-      source(:seq)
-      target(:id)
-      key(999_888_777)
+      source :seq
+      target :id
+      key 999_888_777
     end
   end
 end
@@ -119,19 +119,19 @@ defmodule AshFeistelCipher.Test.CustomSourceResource do
     extensions: [AshFeistelCipher]
 
   postgres do
-    table("custom_source_resources")
-    repo(AshFeistelCipher.Test.Repo)
+    table "custom_source_resources"
+    repo AshFeistelCipher.Test.Repo
   end
 
   attributes do
-    attribute(:sequence_number, :integer, primary_key?: true, allow_nil?: false, source: :seq_num)
-    attribute(:encrypted_id, :integer, source: :enc_id)
+    attribute :sequence_number, :integer, primary_key?: true, allow_nil?: false, source: :seq_num
+    attribute :encrypted_id, :integer, source: :enc_id
   end
 
   feistel_cipher do
     encrypt do
-      source(:sequence_number)
-      target(:encrypted_id)
+      source :sequence_number
+      target :encrypted_id
     end
   end
 end
@@ -144,8 +144,8 @@ defmodule AshFeistelCipher.Test.CustomFunctionsPrefixResource do
     extensions: [AshFeistelCipher]
 
   postgres do
-    table("custom_prefix_resources")
-    repo(AshFeistelCipher.Test.Repo)
+    table "custom_prefix_resources"
+    repo AshFeistelCipher.Test.Repo
   end
 
   attributes do
@@ -154,11 +154,11 @@ defmodule AshFeistelCipher.Test.CustomFunctionsPrefixResource do
   end
 
   feistel_cipher do
-    functions_prefix("crypto")
+    functions_prefix "crypto"
 
     encrypt do
-      source(:seq)
-      target(:id)
+      source :seq
+      target :id
     end
   end
 end
@@ -171,9 +171,9 @@ defmodule AshFeistelCipher.Test.CustomSchemaResource do
     extensions: [AshFeistelCipher]
 
   postgres do
-    table("custom_schema_resources")
-    schema("accounts")
-    repo(AshFeistelCipher.Test.Repo)
+    table "custom_schema_resources"
+    schema "accounts"
+    repo AshFeistelCipher.Test.Repo
   end
 
   attributes do
@@ -183,8 +183,8 @@ defmodule AshFeistelCipher.Test.CustomSchemaResource do
 
   feistel_cipher do
     encrypt do
-      source(:seq)
-      target(:id)
+      source :seq
+      target :id
     end
   end
 end
@@ -197,8 +197,8 @@ defmodule AshFeistelCipher.Test.CustomRoundsResource do
     extensions: [AshFeistelCipher]
 
   postgres do
-    table("custom_rounds_resources")
-    repo(AshFeistelCipher.Test.Repo)
+    table "custom_rounds_resources"
+    repo AshFeistelCipher.Test.Repo
   end
 
   attributes do
@@ -208,9 +208,9 @@ defmodule AshFeistelCipher.Test.CustomRoundsResource do
 
   feistel_cipher do
     encrypt do
-      source(:seq)
-      target(:id)
-      rounds(8)
+      source :seq
+      target :id
+      rounds 8
     end
   end
 end
