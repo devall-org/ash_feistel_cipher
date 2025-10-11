@@ -1,6 +1,6 @@
 # AshFeistelCipher
 
-Unpredictable integer IDs for Ash resources - UUID alternative using Feistel cipher
+Encrypted integer IDs for Ash resources - UUID alternative using Feistel cipher
 
 ## Overview
 
