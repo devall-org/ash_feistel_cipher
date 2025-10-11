@@ -24,6 +24,7 @@ defmodule AshFeistelCipher do
     schema:
       Ash.Resource.Attribute.attribute_schema()
       |> Spark.Options.Helpers.set_default!(:type, :integer)
+      |> Spark.Options.Helpers.set_default!(:writable?, false)
       |> Spark.Options.Helpers.set_default!(:generated?, true)
       |> Spark.Options.Helpers.set_default!(:allow_nil?, false),
     transform: {Ash.Resource.Attribute, :transform, []}
@@ -99,12 +100,6 @@ defmodule AshFeistelCipher do
     ]
   ]
 
-  @encrypted_integer_schema @feistel_options ++
-                              (Ash.Resource.Attribute.attribute_schema()
-                               |> Spark.Options.Helpers.set_default!(:writable?, false)
-                               |> Spark.Options.Helpers.set_default!(:generated?, true)
-                               |> Spark.Options.Helpers.set_default!(:type, :integer))
-
   @encrypted_integer %Spark.Dsl.Entity{
     name: :encrypted_integer,
     describe: """
@@ -120,7 +115,12 @@ defmodule AshFeistelCipher do
     ],
     args: [:name],
     target: AshFeistelCipher.FeistelEncrypted,
-    schema: @encrypted_integer_schema,
+    schema:
+      @feistel_options ++
+        (Ash.Resource.Attribute.attribute_schema()
+         |> Spark.Options.Helpers.set_default!(:type, :integer)
+         |> Spark.Options.Helpers.set_default!(:writable?, false)
+         |> Spark.Options.Helpers.set_default!(:generated?, true)),
     transform: {__MODULE__, :mark_as_feistel_encrypted, []}
   }
 
@@ -128,27 +128,6 @@ defmodule AshFeistelCipher do
     section_path: [:attributes],
     entity: @encrypted_integer
   }
-
-  @encrypted_integer_primary_key_schema @feistel_options ++
-                                          (Ash.Resource.Attribute.attribute_schema()
-                                           |> Spark.Options.Helpers.set_default!(
-                                             :writable?,
-                                             false
-                                           )
-                                           |> Spark.Options.Helpers.set_default!(
-                                             :generated?,
-                                             true
-                                           )
-                                           |> Spark.Options.Helpers.set_default!(:type, :integer)
-                                           |> Spark.Options.Helpers.set_default!(
-                                             :primary_key?,
-                                             true
-                                           )
-                                           |> Spark.Options.Helpers.set_default!(
-                                             :allow_nil?,
-                                             false
-                                           )
-                                           |> Spark.Options.Helpers.set_default!(:public?, true))
 
   @encrypted_integer_primary_key %Spark.Dsl.Entity{
     name: :encrypted_integer_primary_key,
@@ -164,7 +143,15 @@ defmodule AshFeistelCipher do
     ],
     args: [:name],
     target: AshFeistelCipher.FeistelEncrypted,
-    schema: @encrypted_integer_primary_key_schema,
+    schema:
+      @feistel_options ++
+        (Ash.Resource.Attribute.attribute_schema()
+         |> Spark.Options.Helpers.set_default!(:type, :integer)
+         |> Spark.Options.Helpers.set_default!(:writable?, false)
+         |> Spark.Options.Helpers.set_default!(:generated?, true)
+         |> Spark.Options.Helpers.set_default!(:primary_key?, true)
+         |> Spark.Options.Helpers.set_default!(:allow_nil?, false)
+         |> Spark.Options.Helpers.set_default!(:public?, true)),
     transform: {__MODULE__, :mark_as_feistel_encrypted, []}
   }
 
