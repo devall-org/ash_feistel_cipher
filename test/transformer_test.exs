@@ -135,8 +135,8 @@ defmodule AshFeistelCipher.TransformerTest do
   end
 
   describe "validate_unique_target!/1" do
-    test "raises error when same target is used multiple times" do
-      assert_raise RuntimeError, ~r/id is used for multiple encrypts/, fn ->
+    test "raises error when same target is defined multiple times" do
+      assert_raise RuntimeError, ~r/id is defined multiple times/, fn ->
         defmodule DuplicateTargetResource do
           use Ash.Resource,
             domain: AshFeistelCipher.Test.Domain,
@@ -151,20 +151,9 @@ defmodule AshFeistelCipher.TransformerTest do
           attributes do
             integer_sequence :seq
             attribute :another_seq, :integer
-            attribute :id, :integer
-          end
-
-          feistel_cipher do
-            encrypt do
-              source :seq
-              target :id
-            end
-
-            encrypt do
-              source :another_seq
-              # Duplicate target - should raise error
-              target :id
-            end
+            feistel_encrypted :id, from: :seq
+            # Duplicate target - should raise error
+            feistel_encrypted :id, from: :another_seq
           end
         end
       end

@@ -14,67 +14,54 @@ defmodule AshFeistelCipher.Verifier.AllowNilConsistencyTest do
     test "returns :ok when both source and target allow nil" do
       attributes = [
         build_attribute(:seq, allow_nil?: true),
-        build_attribute(:id, allow_nil?: true)
+        build_attribute(:id, is_target: true, from: :seq, allow_nil?: true)
       ]
 
-      encrypts = [build_encrypt(:seq, :id)]
-
-      dsl_state = build_dsl_state(attributes, encrypts)
+      dsl_state = build_dsl_state(attributes)
       assert :ok == AshFeistelCipher.Verifier.AllowNilConsistency.verify(dsl_state)
     end
 
     test "returns :ok when both source and target don't allow nil" do
       attributes = [
         build_attribute(:seq, allow_nil?: false),
-        build_attribute(:id, allow_nil?: false)
+        build_attribute(:id, is_target: true, from: :seq, allow_nil?: false)
       ]
 
-      encrypts = [build_encrypt(:seq, :id)]
-
-      dsl_state = build_dsl_state(attributes, encrypts)
+      dsl_state = build_dsl_state(attributes)
       assert :ok == AshFeistelCipher.Verifier.AllowNilConsistency.verify(dsl_state)
     end
 
     test "returns :ok when source doesn't allow nil but target does" do
       attributes = [
         build_attribute(:seq, allow_nil?: false),
-        build_attribute(:id, allow_nil?: true)
+        build_attribute(:id, is_target: true, from: :seq, allow_nil?: true)
       ]
 
-      encrypts = [build_encrypt(:seq, :id)]
-
-      dsl_state = build_dsl_state(attributes, encrypts)
+      dsl_state = build_dsl_state(attributes)
       assert :ok == AshFeistelCipher.Verifier.AllowNilConsistency.verify(dsl_state)
     end
 
     test "returns error when source allows nil but target doesn't" do
       attributes = [
         build_attribute(:seq, allow_nil?: true),
-        build_attribute(:id, allow_nil?: false)
+        build_attribute(:id, is_target: true, from: :seq, allow_nil?: false)
       ]
 
-      encrypts = [build_encrypt(:seq, :id)]
-
-      dsl_state = build_dsl_state(attributes, encrypts)
+      dsl_state = build_dsl_state(attributes)
       assert {:error, error} = AshFeistelCipher.Verifier.AllowNilConsistency.verify(dsl_state)
       assert error.message =~ "Nullable column mismatch"
-      assert error.message =~ "source: :seq (allow_nil?: true)"
+      assert error.message =~ "from: :seq (allow_nil?: true)"
       assert error.message =~ "target: :id (allow_nil?: false)"
     end
 
     test "returns error for multiple inconsistent encrypts" do
       attributes = [
         build_attribute(:seq, allow_nil?: true),
-        build_attribute(:id, allow_nil?: false),
-        build_attribute(:referral_code, allow_nil?: false)
+        build_attribute(:id, is_target: true, from: :seq, allow_nil?: false),
+        build_attribute(:referral_code, is_target: true, from: :seq, allow_nil?: false)
       ]
 
-      encrypts = [
-        build_encrypt(:seq, :id),
-        build_encrypt(:seq, :referral_code)
-      ]
-
-      dsl_state = build_dsl_state(attributes, encrypts)
+      dsl_state = build_dsl_state(attributes)
       assert {:error, error} = AshFeistelCipher.Verifier.AllowNilConsistency.verify(dsl_state)
 
       # Both inconsistencies should be mentioned
@@ -87,16 +74,11 @@ defmodule AshFeistelCipher.Verifier.AllowNilConsistencyTest do
       attributes = [
         build_attribute(:seq1, allow_nil?: false),
         build_attribute(:seq2, allow_nil?: true),
-        build_attribute(:id1, allow_nil?: false),
-        build_attribute(:id2, allow_nil?: false)
+        build_attribute(:id1, is_target: true, from: :seq1, allow_nil?: false),
+        build_attribute(:id2, is_target: true, from: :seq2, allow_nil?: false)
       ]
 
-      encrypts = [
-        build_encrypt(:seq1, :id1),
-        build_encrypt(:seq2, :id2)
-      ]
-
-      dsl_state = build_dsl_state(attributes, encrypts)
+      dsl_state = build_dsl_state(attributes)
       assert {:error, error} = AshFeistelCipher.Verifier.AllowNilConsistency.verify(dsl_state)
 
       # Only seq2 -> id2 should be mentioned
@@ -109,28 +91,24 @@ defmodule AshFeistelCipher.Verifier.AllowNilConsistencyTest do
     test "error message provides helpful suggestions" do
       attributes = [
         build_attribute(:seq, allow_nil?: true),
-        build_attribute(:user_id, allow_nil?: false)
+        build_attribute(:user_id, is_target: true, from: :seq, allow_nil?: false)
       ]
 
-      encrypts = [build_encrypt(:seq, :user_id)]
-
-      dsl_state = build_dsl_state(attributes, encrypts)
+      dsl_state = build_dsl_state(attributes)
       assert {:error, error} = AshFeistelCipher.Verifier.AllowNilConsistency.verify(dsl_state)
 
       # Should include helpful suggestions
-      assert error.message =~ "allow_nil? true"
-      assert error.message =~ "feistel_cipher_target :user_id"
+      assert error.message =~ "allow_nil?: true"
+      assert error.message =~ "feistel_encrypted :user_id"
     end
 
-    test "returns :ok when no encrypts are defined" do
+    test "returns :ok when no feistel_encrypted attributes are defined" do
       attributes = [
         build_attribute(:seq, allow_nil?: true),
         build_attribute(:id, allow_nil?: false)
       ]
 
-      encrypts = []
-
-      dsl_state = build_dsl_state(attributes, encrypts)
+      dsl_state = build_dsl_state(attributes)
       assert :ok == AshFeistelCipher.Verifier.AllowNilConsistency.verify(dsl_state)
     end
   end

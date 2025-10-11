@@ -1,3 +1,3 @@
 defmodule AshFeistelCipher.Info do
-  use Spark.InfoGenerator, extension: AshFeistelCipher, sections: [:feistel_cipher]
+  use Spark.InfoGenerator, extension: AshFeistelCipher, sections: []
 end

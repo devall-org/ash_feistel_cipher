@@ -12,15 +12,8 @@ defmodule AshFeistelCipher.Test.ValidResource do
 
   attributes do
     integer_sequence :seq
-    feistel_cipher_target :id, primary_key?: true, allow_nil?: false, public?: true
+    feistel_encrypted :id, from: :seq, primary_key?: true, allow_nil?: false, public?: true
     attribute :name, :string
-  end
-
-  feistel_cipher do
-    encrypt do
-      source :seq
-      target :id
-    end
   end
 end
 
@@ -38,24 +31,9 @@ defmodule AshFeistelCipher.Test.MultipleEncryptsResource do
 
   attributes do
     integer_sequence :seq
-    feistel_cipher_target :id, primary_key?: true, allow_nil?: false, public?: true
-    attribute :referral_code, :integer
+    feistel_encrypted :id, from: :seq, bits: 52, primary_key?: true, allow_nil?: false, public?: true
+    feistel_encrypted :referral_code, from: :seq, bits: 40, key: 12345
     attribute :name, :string
-  end
-
-  feistel_cipher do
-    encrypt do
-      source :seq
-      target :id
-      bits 52
-    end
-
-    encrypt do
-      source :seq
-      target :referral_code
-      bits 40
-      key 12345
-    end
   end
 end
 
@@ -73,15 +51,7 @@ defmodule AshFeistelCipher.Test.CustomBitsResource do
 
   attributes do
     integer_sequence :seq
-    feistel_cipher_target :id, primary_key?: true, allow_nil?: false, public?: true
-  end
-
-  feistel_cipher do
-    encrypt do
-      source :seq
-      target :id
-      bits 40
-    end
+    feistel_encrypted :id, from: :seq, bits: 40, primary_key?: true, allow_nil?: false, public?: true
   end
 end
 
@@ -99,15 +69,7 @@ defmodule AshFeistelCipher.Test.CustomKeyResource do
 
   attributes do
     integer_sequence :seq
-    feistel_cipher_target :id, primary_key?: true, allow_nil?: false, public?: true
-  end
-
-  feistel_cipher do
-    encrypt do
-      source :seq
-      target :id
-      key 999_888_777
-    end
+    feistel_encrypted :id, from: :seq, key: 999_888_777, primary_key?: true, allow_nil?: false, public?: true
   end
 end
 
@@ -125,14 +87,7 @@ defmodule AshFeistelCipher.Test.CustomSourceResource do
 
   attributes do
     attribute :sequence_number, :integer, primary_key?: true, allow_nil?: false, source: :seq_num
-    attribute :encrypted_id, :integer, source: :enc_id
-  end
-
-  feistel_cipher do
-    encrypt do
-      source :sequence_number
-      target :encrypted_id
-    end
+    feistel_encrypted :encrypted_id, from: :sequence_number, source: :enc_id
   end
 end
 
@@ -150,16 +105,7 @@ defmodule AshFeistelCipher.Test.CustomFunctionsPrefixResource do
 
   attributes do
     integer_sequence :seq
-    feistel_cipher_target :id, primary_key?: true, allow_nil?: false, public?: true
-  end
-
-  feistel_cipher do
-    functions_prefix "crypto"
-
-    encrypt do
-      source :seq
-      target :id
-    end
+    feistel_encrypted :id, from: :seq, functions_prefix: "crypto", primary_key?: true, allow_nil?: false, public?: true
   end
 end
 
@@ -178,14 +124,7 @@ defmodule AshFeistelCipher.Test.CustomSchemaResource do
 
   attributes do
     integer_sequence :seq
-    attribute :id, :integer, allow_nil?: false, primary_key?: true
-  end
-
-  feistel_cipher do
-    encrypt do
-      source :seq
-      target :id
-    end
+    feistel_encrypted :id, from: :seq, allow_nil?: false, primary_key?: true
   end
 end
 
@@ -203,14 +142,6 @@ defmodule AshFeistelCipher.Test.CustomRoundsResource do
 
   attributes do
     integer_sequence :seq
-    feistel_cipher_target :id, primary_key?: true, allow_nil?: false, public?: true
-  end
-
-  feistel_cipher do
-    encrypt do
-      source :seq
-      target :id
-      rounds 8
-    end
+    feistel_encrypted :id, from: :seq, rounds: 8, primary_key?: true, allow_nil?: false, public?: true
   end
 end
