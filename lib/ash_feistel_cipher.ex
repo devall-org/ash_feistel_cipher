@@ -175,5 +175,6 @@ defmodule AshFeistelCipher do
   use Spark.Dsl.Extension,
     sections: [@feistel_cipher],
     dsl_patches: [@integer_sequence_patch, @feistel_cipher_target_patch],
-    transformers: [AshFeistelCipher.Transformer]
+    transformers: [AshFeistelCipher.Transformer],
+    verifiers: [AshFeistelCipher.Verifier]
 end
