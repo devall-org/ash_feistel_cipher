@@ -81,7 +81,7 @@ defmodule MyApp.Post do
 
   attributes do
     integer_sequence :seq
-    feistel_encrypted :id, from: :seq, primary_key?: true, allow_nil?: false
+    encrypted_integer :id, from: :seq, primary_key?: true, allow_nil?: false
     
     attribute :title, :string, allow_nil?: false
     timestamps()
@@ -102,8 +102,8 @@ This creates a migration with database triggers that automatically encrypt `seq`
 ```elixir
 attributes do
   integer_sequence :seq
-  feistel_encrypted :id, from: :seq, primary_key?: true
-  feistel_encrypted :referral_code, from: :seq, key: 12345  # Different key for referral codes
+  encrypted_integer :id, from: :seq, primary_key?: true
+  encrypted_integer :referral_code, from: :seq, key: 12345  # Different key for referral codes
 end
 ```
 
@@ -111,7 +111,7 @@ end
 ```elixir
 attributes do
   integer_sequence :seq
-  feistel_encrypted :id, 
+  encrypted_integer :id, 
     from: :seq,
     bits: 40,     # Encryption bit size - determines ID range (default: 52)
     rounds: 8     # Feistel rounds (default: 16)
@@ -122,7 +122,7 @@ end
 ```elixir
 attributes do
   attribute :custom_number, :integer
-  feistel_encrypted :encrypted_number, from: :custom_number
+  encrypted_integer :encrypted_number, from: :custom_number
 end
 ```
 
@@ -130,7 +130,7 @@ end
 ```elixir
 attributes do
   integer_sequence :optional_seq, allow_nil?: true
-  feistel_encrypted :optional_id, from: :optional_seq, allow_nil?: true
+  encrypted_integer :optional_id, from: :optional_seq, allow_nil?: true
 end
 ```
 
@@ -142,7 +142,7 @@ integer_sequence :seq                        # Non-nullable
 integer_sequence :optional_seq, allow_nil?: true  # Nullable
 ```
 
-**`feistel_encrypted`**: Encrypted integer column with automatic trigger
+**`encrypted_integer`**: Encrypted integer column with automatic trigger
 
 Required options:
 - `from`: Source attribute name

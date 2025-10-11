@@ -99,10 +99,10 @@ defmodule AshFeistelCipher.Verifier.AllowNilConsistencyTest do
 
       # Should include helpful suggestions
       assert error.message =~ "allow_nil?: true"
-      assert error.message =~ "feistel_encrypted :user_id"
+      assert error.message =~ "encrypted_integer :user_id"
     end
 
-    test "returns :ok when no feistel_encrypted attributes are defined" do
+    test "returns :ok when no encrypted_integer attributes are defined" do
       attributes = [
         build_attribute(:seq, allow_nil?: true),
         build_attribute(:id, allow_nil?: false)

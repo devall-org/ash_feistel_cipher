@@ -65,7 +65,7 @@ defmodule AshFeistelCipher do
     end
   end
 
-  @feistel_encrypted_schema [
+  @encrypted_integer_schema [
     from: [
       type: :atom,
       required: true,
@@ -93,32 +93,32 @@ defmodule AshFeistelCipher do
     ]
   ] ++ (Ash.Resource.Attribute.attribute_schema() |> Spark.Options.Helpers.set_default!(:writable?, false) |> Spark.Options.Helpers.set_default!(:generated?, true) |> Spark.Options.Helpers.set_default!(:type, :integer))
 
-  @feistel_encrypted %Spark.Dsl.Entity{
-    name: :feistel_encrypted,
+  @encrypted_integer %Spark.Dsl.Entity{
+    name: :encrypted_integer,
     describe: """
     Declares an encrypted integer column for Feistel cipher.
     This is a convenience utility that sets writable?: false and generated?: true automatically.
     All encryption configuration is specified directly on the attribute.
     """,
     examples: [
-      "feistel_encrypted :id, from: :seq, primary_key?: true",
-      "feistel_encrypted :referral_code, from: :seq, key: 12345",
-      "feistel_encrypted :optional_id, from: :seq, allow_nil?: true",
-      "feistel_encrypted :id, from: :seq, bits: 40, functions_prefix: \"accounts\""
+      "encrypted_integer :id, from: :seq, primary_key?: true",
+      "encrypted_integer :referral_code, from: :seq, key: 12345",
+      "encrypted_integer :optional_id, from: :seq, allow_nil?: true",
+      "encrypted_integer :id, from: :seq, bits: 40, functions_prefix: \"accounts\""
     ],
     args: [:name],
     target: AshFeistelCipher.FeistelEncrypted,
-    schema: @feistel_encrypted_schema,
+    schema: @encrypted_integer_schema,
     transform: {__MODULE__, :mark_as_feistel_encrypted, []}
   }
 
-  @feistel_encrypted_patch %Spark.Dsl.Patch.AddEntity{
+  @encrypted_integer_patch %Spark.Dsl.Patch.AddEntity{
     section_path: [:attributes],
-    entity: @feistel_encrypted
+    entity: @encrypted_integer
   }
 
   use Spark.Dsl.Extension,
-    dsl_patches: [@integer_sequence_patch, @feistel_encrypted_patch],
+    dsl_patches: [@integer_sequence_patch, @encrypted_integer_patch],
     transformers: [AshFeistelCipher.Transformer],
     verifiers: [
       AshFeistelCipher.Verifier.MissingSource,
