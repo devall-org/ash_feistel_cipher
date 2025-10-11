@@ -10,38 +10,43 @@ defmodule AshFeistelCipher.Transformer do
   def transform(dsl_state) do
     dsl_state
     |> tap(&validate_unique_target!/1)
-    |> Transformer.get_entities([:feistel_cipher])
+    |> get_feistel_encrypted_attributes()
     |> Enum.reduce(dsl_state, &add_feistel_cipher_trigger(&1, &2))
     |> then(fn dsl_state -> {:ok, dsl_state} end)
   end
 
+  defp get_feistel_encrypted_attributes(dsl_state) do
+    dsl_state
+    |> Transformer.get_entities([:attributes])
+    |> Enum.filter(fn attr ->
+      Map.get(attr, :__feistel_cipher_target__, false)
+    end)
+  end
+
   defp validate_unique_target!(dsl_state) do
     dsl_state
-    |> Transformer.get_entities([:feistel_cipher])
-    |> Enum.group_by(fn entity -> entity.target end)
-    |> Enum.each(fn {target, encrypts} ->
-      if length(encrypts) > 1 do
-        raise "#{target} is used for multiple encrypts: #{inspect(encrypts)}"
+    |> get_feistel_encrypted_attributes()
+    |> Enum.group_by(fn attr -> attr.name end)
+    |> Enum.each(fn {target, attrs} ->
+      if length(attrs) > 1 do
+        raise "#{target} is defined multiple times: #{inspect(attrs)}"
       end
     end)
   end
 
-  defp add_feistel_cipher_trigger(
-         %AshFeistelCipher.Encrypt{
-           source: source,
-           target: target,
-           bits: bits,
-           key: key,
-           rounds: rounds
-         },
-         dsl_state
-       ) do
-    source = get_db_column_name(source, dsl_state)
-    target = get_db_column_name(target, dsl_state)
+  defp add_feistel_cipher_trigger(attribute, dsl_state) do
+    source_attr = Map.get(attribute, :__feistel_from__)
+    target_attr = attribute.name
+    bits = Map.get(attribute, :__feistel_bits__)
+    key = Map.get(attribute, :__feistel_key__)
+    rounds = Map.get(attribute, :__feistel_rounds__)
+    functions_prefix = Map.get(attribute, :__feistel_functions_prefix__)
+
+    source = get_db_column_name(source_attr, dsl_state)
+    target = get_db_column_name(target_attr, dsl_state)
 
     table = dsl_state |> Transformer.get_option([:postgres], :table)
     prefix = dsl_state |> Transformer.get_option([:postgres], :schema) || "public"
-    functions_prefix = dsl_state |> Transformer.get_option([:feistel_cipher], :functions_prefix)
 
     up =
       FeistelCipher.up_for_trigger(prefix, table, source, target,

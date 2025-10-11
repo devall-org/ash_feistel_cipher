@@ -13,17 +13,22 @@ defmodule AshFeistelCipher.Verifier.AllowNilConsistency do
     # Get all attributes
     attributes = Verifier.get_entities(dsl_state, [:attributes])
 
-    # Get encrypt configurations (entities are directly under [:feistel_cipher])
-    encrypts = Verifier.get_entities(dsl_state, [:feistel_cipher])
-
     # Create a map of attribute names to their allow_nil? setting
     attr_map = Map.new(attributes, fn attr -> {attr.name, Map.get(attr, :allow_nil?, false)} end)
 
-    # Check each encrypt configuration
+    # Find feistel_encrypted attributes
+    feistel_targets =
+      attributes
+      |> Enum.filter(fn attr ->
+        Map.get(attr, :__feistel_cipher_target__, false)
+      end)
+
+    # Check each feistel_encrypted attribute
     inconsistent =
-      Enum.filter(encrypts, fn encrypt ->
-        source_allow_nil = Map.get(attr_map, encrypt.source, false)
-        target_allow_nil = Map.get(attr_map, encrypt.target, false)
+      Enum.filter(feistel_targets, fn target_attr ->
+        source_name = Map.get(target_attr, :__feistel_from__)
+        source_allow_nil = Map.get(attr_map, source_name, false)
+        target_allow_nil = Map.get(target_attr, :allow_nil?, false)
 
         # If source allows nil, target should also allow nil
         source_allow_nil && !target_allow_nil
@@ -33,10 +38,11 @@ defmodule AshFeistelCipher.Verifier.AllowNilConsistency do
       [] ->
         :ok
 
-      encrypts_with_issues ->
+      attrs_with_issues ->
         error_details =
-          Enum.map_join(encrypts_with_issues, "\n", fn encrypt ->
-            "  - source: #{inspect(encrypt.source)} (allow_nil?: true), target: #{inspect(encrypt.target)} (allow_nil?: false)"
+          Enum.map_join(attrs_with_issues, "\n", fn attr ->
+            source_name = Map.get(attr, :__feistel_from__)
+            "  - from: #{inspect(source_name)} (allow_nil?: true), target: #{inspect(attr.name)} (allow_nil?: false)"
           end)
 
         {:error,
@@ -47,13 +53,11 @@ defmodule AshFeistelCipher.Verifier.AllowNilConsistency do
 
            #{error_details}
 
-           Please update the target attribute(s) to include `allow_nil? true`:
+           Please update the target attribute(s) to include `allow_nil?: true`:
 
-               feistel_cipher_target :#{List.first(encrypts_with_issues).target}, :string do
-                 allow_nil? true
-               end
+               feistel_encrypted :#{List.first(attrs_with_issues).name}, from: :#{Map.get(List.first(attrs_with_issues), :__feistel_from__)}, allow_nil?: true
            """,
-           path: [:feistel_cipher]
+           path: [:attributes]
          )}
     end
   end
