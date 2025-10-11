@@ -6,12 +6,12 @@ defmodule AshFeistelCipher.Verifier.MissingSourceTest do
   @moduledoc """
   Tests for AshFeistelCipher.Verifier.MissingSource
 
-  The verifier ensures that all `feistel_encrypted` attributes have
+  The verifier ensures that all `encrypted_integer` attributes have
   a `from` option configured.
   """
 
   describe "verify/1" do
-    test "returns :ok when all feistel_encrypted attributes have from configured" do
+    test "returns :ok when all encrypted_integer attributes have from configured" do
       attributes = [
         build_attribute(:seq),
         build_attribute(:id, is_target: true, from: :seq)
@@ -21,7 +21,7 @@ defmodule AshFeistelCipher.Verifier.MissingSourceTest do
       assert :ok == AshFeistelCipher.Verifier.MissingSource.verify(dsl_state)
     end
 
-    test "returns :ok when no feistel_encrypted attributes exist" do
+    test "returns :ok when no encrypted_integer attributes exist" do
       attributes = [
         build_attribute(:seq),
         build_attribute(:id)
@@ -31,7 +31,7 @@ defmodule AshFeistelCipher.Verifier.MissingSourceTest do
       assert :ok == AshFeistelCipher.Verifier.MissingSource.verify(dsl_state)
     end
 
-    test "returns error when feistel_encrypted has no from configured" do
+    test "returns error when encrypted_integer has no from configured" do
       attributes = [
         build_attribute(:seq),
         build_attribute(:id, is_target: true, from: nil)
@@ -83,12 +83,12 @@ defmodule AshFeistelCipher.Verifier.MissingSourceTest do
       assert {:error, error} = AshFeistelCipher.Verifier.MissingSource.verify(dsl_state)
 
       # Should include helpful suggestions
-      assert error.message =~ "feistel_encrypted :user_id"
+      assert error.message =~ "encrypted_integer :user_id"
       assert error.message =~ "from: :seq"
       assert error.message =~ "use `attribute` instead"
     end
 
-    test "returns :ok for multiple valid feistel_encrypted attributes" do
+    test "returns :ok for multiple valid encrypted_integer attributes" do
       attributes = [
         build_attribute(:seq),
         build_attribute(:id, is_target: true, from: :seq),

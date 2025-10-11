@@ -16,14 +16,14 @@ defmodule AshFeistelCipher.Verifier.AllowNilConsistency do
     # Create a map of attribute names to their allow_nil? setting
     attr_map = Map.new(attributes, fn attr -> {attr.name, Map.get(attr, :allow_nil?, false)} end)
 
-    # Find feistel_encrypted attributes
+    # Find encrypted_integer attributes
     feistel_targets =
       attributes
       |> Enum.filter(fn attr ->
         Map.get(attr, :__feistel_cipher_target__, false)
       end)
 
-    # Check each feistel_encrypted attribute
+    # Check each encrypted_integer attribute
     inconsistent =
       Enum.filter(feistel_targets, fn target_attr ->
         source_name = Map.get(target_attr, :__feistel_from__)
@@ -55,7 +55,7 @@ defmodule AshFeistelCipher.Verifier.AllowNilConsistency do
 
            Please update the target attribute(s) to include `allow_nil?: true`:
 
-               feistel_encrypted :#{List.first(attrs_with_issues).name}, from: :#{Map.get(List.first(attrs_with_issues), :__feistel_from__)}, allow_nil?: true
+               encrypted_integer :#{List.first(attrs_with_issues).name}, from: :#{Map.get(List.first(attrs_with_issues), :__feistel_from__)}, allow_nil?: true
            """,
            path: [:attributes]
          )}

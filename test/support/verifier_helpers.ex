@@ -24,9 +24,9 @@ defmodule AshFeistelCipher.VerifierHelpers do
   Builds a mock attribute for testing.
 
   ## Options
-  - `:is_target` - Whether this is a feistel_encrypted (default: false)
+  - `:is_target` - Whether this is a encrypted_integer (default: false)
   - `:allow_nil?` - Whether the attribute allows nil (default: false)
-  - `:from` - Source attribute for feistel_encrypted (required if is_target is true)
+  - `:from` - Source attribute for encrypted_integer (required if is_target is true)
   """
   def build_attribute(name, opts \\ []) do
     is_target = Keyword.get(opts, :is_target, false)

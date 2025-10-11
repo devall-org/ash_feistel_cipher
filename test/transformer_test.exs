@@ -144,16 +144,16 @@ defmodule AshFeistelCipher.TransformerTest do
             extensions: [AshFeistelCipher]
 
           postgres do
-            table "duplicate_target"
-            repo AshFeistelCipher.Test.Repo
+            table("duplicate_target")
+            repo(AshFeistelCipher.Test.Repo)
           end
 
           attributes do
-            integer_sequence :seq
-            attribute :another_seq, :integer
-            feistel_encrypted :id, from: :seq
+            integer_sequence(:seq)
+            attribute(:another_seq, :integer)
+            encrypted_integer(:id, from: :seq)
             # Duplicate target - should raise error
-            feistel_encrypted :id, from: :another_seq
+            encrypted_integer(:id, from: :another_seq)
           end
         end
       end
