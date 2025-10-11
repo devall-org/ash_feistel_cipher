@@ -11,9 +11,9 @@ defmodule AshFeistelCipher.Test.ValidResource do
   end
 
   attributes do
-    integer_primary_key(:seq)
-    attribute(:id, :integer)
-    attribute(:name, :string)
+    feistel_cipher_source :seq
+    attribute :id, :integer, allow_nil?: false, primary_key?: true
+    attribute :name, :string
   end
 
   feistel_cipher do
@@ -37,10 +37,10 @@ defmodule AshFeistelCipher.Test.MultipleEncryptsResource do
   end
 
   attributes do
-    integer_primary_key(:seq)
-    attribute(:id, :integer)
-    attribute(:referral_code, :integer)
-    attribute(:name, :string)
+    feistel_cipher_source :seq
+    attribute :id, :integer, allow_nil?: false, primary_key?: true
+    attribute :referral_code, :integer
+    attribute :name, :string
   end
 
   feistel_cipher do
@@ -72,8 +72,8 @@ defmodule AshFeistelCipher.Test.CustomBitsResource do
   end
 
   attributes do
-    integer_primary_key(:seq)
-    attribute(:id, :integer)
+    feistel_cipher_source :seq
+    attribute :id, :integer, allow_nil?: false, primary_key?: true
   end
 
   feistel_cipher do
@@ -98,8 +98,8 @@ defmodule AshFeistelCipher.Test.CustomKeyResource do
   end
 
   attributes do
-    integer_primary_key(:seq)
-    attribute(:id, :integer)
+    feistel_cipher_source :seq
+    attribute :id, :integer, allow_nil?: false, primary_key?: true
   end
 
   feistel_cipher do
@@ -149,8 +149,8 @@ defmodule AshFeistelCipher.Test.CustomFunctionsPrefixResource do
   end
 
   attributes do
-    integer_primary_key(:seq)
-    attribute(:id, :integer)
+    feistel_cipher_source :seq
+    attribute :id, :integer, allow_nil?: false, primary_key?: true
   end
 
   feistel_cipher do
@@ -177,8 +177,8 @@ defmodule AshFeistelCipher.Test.CustomSchemaResource do
   end
 
   attributes do
-    integer_primary_key(:seq)
-    attribute(:id, :integer)
+    feistel_cipher_source :seq
+    attribute :id, :integer, allow_nil?: false, primary_key?: true
   end
 
   feistel_cipher do
@@ -202,8 +202,8 @@ defmodule AshFeistelCipher.Test.CustomRoundsResource do
   end
 
   attributes do
-    integer_primary_key(:seq)
-    attribute(:id, :integer)
+    feistel_cipher_source :seq
+    attribute :id, :integer, allow_nil?: false, primary_key?: true
   end
 
   feistel_cipher do

@@ -42,7 +42,7 @@ If you need more control over the installation process, you can install manually
    ```elixir
    def deps do
      [
-       {:ash_feistel_cipher, "~> 0.9.3"}
+       {:ash_feistel_cipher, "~> 0.10.0"}
      ]
    end
    ```
@@ -78,10 +78,10 @@ defmodule MyApp.Post do
     extensions: [AshFeistelCipher]
 
   attributes do
-    integer_primary_key :id
+    attribute :id, :integer, allow_nil?: false, primary_key?: true
+    attribute :referral_code, :integer
 
-    # 'seq' is only a source for generating serial integers, so override with primary_key?: false.
-    integer_primary_key :seq, primary_key?: false
+    feistel_cipher_source :seq
   end
 
   feistel_cipher do
