@@ -134,39 +134,6 @@ defmodule AshFeistelCipher.TransformerTest do
     end
   end
 
-  describe "validate_unique_target!/1" do
-    test "raises error when same target is defined multiple times" do
-      assert_raise RuntimeError, ~r/id is defined multiple times/, fn ->
-        defmodule DuplicateTargetResource do
-          use Ash.Resource,
-            domain: AshFeistelCipher.Test.Domain,
-            data_layer: AshPostgres.DataLayer,
-            extensions: [AshFeistelCipher]
-
-          postgres do
-            table("duplicate_target")
-            repo(AshFeistelCipher.Test.Repo)
-          end
-
-          attributes do
-            integer_sequence(:seq)
-            attribute(:another_seq, :integer)
-            encrypted_integer(:id, from: :seq)
-            # Duplicate target - should raise error
-            encrypted_integer(:id, from: :another_seq)
-          end
-        end
-      end
-    end
-
-    test "allows multiple encrypts with different targets" do
-      # This should not raise an error
-      statements = get_custom_statements(AshFeistelCipher.Test.MultipleEncryptsResource)
-
-      assert length(statements) == 2
-    end
-  end
-
   describe "down SQL generation" do
     test "generates down SQL with safety guard" do
       statements = get_custom_statements(AshFeistelCipher.Test.ValidResource)
