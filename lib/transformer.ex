@@ -9,7 +9,6 @@ defmodule AshFeistelCipher.Transformer do
   @impl Spark.Dsl.Transformer
   def transform(dsl_state) do
     dsl_state
-    |> tap(&validate_unique_target!/1)
     |> get_feistel_encrypted_attributes()
     |> Enum.reduce(dsl_state, &add_feistel_cipher_trigger(&1, &2))
     |> then(fn dsl_state -> {:ok, dsl_state} end)
@@ -20,17 +19,6 @@ defmodule AshFeistelCipher.Transformer do
     |> Transformer.get_entities([:attributes])
     |> Enum.filter(fn attr ->
       Map.get(attr, :__feistel_cipher_target__, false)
-    end)
-  end
-
-  defp validate_unique_target!(dsl_state) do
-    dsl_state
-    |> get_feistel_encrypted_attributes()
-    |> Enum.group_by(fn attr -> attr.name end)
-    |> Enum.each(fn {target, attrs} ->
-      if length(attrs) > 1 do
-        raise "#{target} is defined multiple times: #{inspect(attrs)}"
-      end
     end)
   end
 
