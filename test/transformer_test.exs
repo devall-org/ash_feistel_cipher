@@ -149,7 +149,7 @@ defmodule AshFeistelCipher.TransformerTest do
           end
 
           attributes do
-            integer_primary_key(:seq)
+            feistel_cipher_source(:seq)
             attribute(:another_seq, :integer)
             attribute(:id, :integer)
           end

@@ -108,7 +108,27 @@ defmodule AshFeistelCipher do
     entities: [@encrypt]
   }
 
+  @feistel_cipher_source %Spark.Dsl.Entity{
+    name: :feistel_cipher_source,
+    describe: "Declares an auto-generated integer sequence column for Feistel cipher encryption.",
+    examples: ["feistel_cipher_source :seq"],
+    args: [:name],
+    target: Ash.Resource.Attribute,
+    schema:
+      Ash.Resource.Attribute.integer_primary_key_schema()
+      |> Spark.Options.Helpers.set_default!(:primary_key?, false)
+      |> Spark.Options.Helpers.set_default!(:public?, false),
+    auto_set_fields: [allow_nil?: false],
+    transform: {Ash.Resource.Attribute, :transform, []}
+  }
+
+  @feistel_cipher_source_patch %Spark.Dsl.Patch.AddEntity{
+    section_path: [:attributes],
+    entity: @feistel_cipher_source
+  }
+
   use Spark.Dsl.Extension,
     sections: [@feistel_cipher],
+    dsl_patches: [@feistel_cipher_source_patch],
     transformers: [AshFeistelCipher.Transformer]
 end
