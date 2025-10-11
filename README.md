@@ -78,16 +78,21 @@ defmodule MyApp.Post do
     extensions: [AshFeistelCipher]
 
   attributes do
-    # Option 1: Use integer_sequence for auto-generated bigserial column
+    # Option 1: Use convenience helpers (recommended for clarity)
     integer_sequence :seq
     feistel_cipher_target :id, primary_key?: true, allow_nil?: false
     feistel_cipher_target :referral_code, allow_nil?: false
     
-    # Option 2: Use nullable integer_sequence (if you need to allow updates to nil)
+    # Option 2: Use regular attributes (equivalent to Option 1)
+    # attribute :seq, :integer, writable?: false, generated?: true
+    # attribute :id, :integer, writable?: false, generated?: true, primary_key?: true, allow_nil?: false
+    # attribute :referral_code, :integer, writable?: false, generated?: true, allow_nil?: false
+    
+    # Option 3: Use nullable columns
     # integer_sequence :optional_seq, allow_nil?: true
     # feistel_cipher_target :optional_id, allow_nil?: true
     
-    # Option 3: Use regular integer attribute as source
+    # Option 4: Use any integer attribute as source (not just integer_sequence)
     # attribute :custom_seq, :integer, allow_nil?: false
     # feistel_cipher_target :custom_id, allow_nil?: false
   end
@@ -152,11 +157,22 @@ will generate a migration that sets up a database trigger to encrypt the `seq` a
 
 ### Key Concepts
 
-- **`integer_sequence`**: A convenience helper that creates an auto-incrementing bigserial column. Use this when you want a sequential source column that automatically increments. You can set `allow_nil?: true` if you need to allow updates that set the value to nil.
+- **`integer_sequence`**: A convenience helper that creates an auto-incrementing bigserial column (equivalent to `attribute :name, :integer, writable?: false, generated?: true`). Use this when you want a sequential source column that automatically increments. You can also use a regular `attribute :name, :integer` instead.
 
-- **`feistel_cipher_target`**: A convenience helper that creates an integer column with `writable?: false` and `generated?: true`. Use this for encrypted output columns. You should set `allow_nil?` to match your source attribute's nullability. **Important**: When you use `feistel_cipher_target`, you must add a corresponding `encrypt` block - otherwise you'll get a compilation error.
+- **`feistel_cipher_target`**: A convenience helper that creates an integer column with `writable?: false` and `generated?: true` (equivalent to `attribute :name, :integer, writable?: false, generated?: true`). Use this for encrypted output columns. You should set `allow_nil?` to match your source attribute's nullability. **Important**: When you use `feistel_cipher_target`, you must add a corresponding `encrypt` block - otherwise you'll get a compilation error. You can also use a regular `attribute :name, :integer, writable?: false, generated?: true` instead.
 
-- **Nullable columns**: Both `integer_sequence` and regular integer attributes support `allow_nil?: true`. When your source allows nil, the target should also allow nil.
+- **Using regular `attribute` instead of helpers**: Both `integer_sequence` and `feistel_cipher_target` are just convenience helpers. You can use regular `attribute` declarations instead:
+  ```elixir
+  # Using helpers (recommended for clarity)
+  integer_sequence :seq
+  feistel_cipher_target :id, primary_key?: true, allow_nil?: false
+  
+  # Equivalent with regular attributes
+  attribute :seq, :integer, writable?: false, generated?: true
+  attribute :id, :integer, writable?: false, generated?: true, primary_key?: true, allow_nil?: false
+  ```
+
+- **Nullable columns**: Both source and target attributes support `allow_nil?: true`. When your source allows nil, the target should also allow nil.
 
 - **`source` in `encrypt` block**: Can be any integer attribute - not limited to `integer_sequence`. You can use any integer column as the source for encryption.
 
