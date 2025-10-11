@@ -69,7 +69,7 @@ If you need more control over the installation process, you can install manually
 
 ## Usage
 
-Use `AshFeistelCipher` in your `Ash.Resource` and configure the `feistel_cipher` block as follows:
+Use `AshFeistelCipher` in your `Ash.Resource` and configure `feistel_encrypted` attributes as follows:
 
 ```elixir
 defmodule MyApp.Post do
@@ -80,44 +80,31 @@ defmodule MyApp.Post do
   attributes do
     # Option 1: Use convenience helpers (recommended for clarity)
     integer_sequence :seq
-    feistel_cipher_target :id, primary_key?: true, allow_nil?: false
-    feistel_cipher_target :referral_code, allow_nil?: false
+    feistel_encrypted :id, from: :seq, primary_key?: true, allow_nil?: false
+    feistel_encrypted :referral_code, from: :seq, key: 12345, allow_nil?: false
     
     # Option 2: Use regular attributes (equivalent to Option 1)
     # attribute :seq, :integer, writable?: false, generated?: true
-    # attribute :id, :integer, writable?: false, generated?: true, primary_key?: true, allow_nil?: false
-    # attribute :referral_code, :integer, writable?: false, generated?: true, allow_nil?: false
+    # attribute :id, :integer, writable?: false, generated?: true, from: :seq, primary_key?: true, allow_nil?: false
+    # attribute :referral_code, :integer, writable?: false, generated?: true, from: :seq, key: 12345, allow_nil?: false
     
     # Option 3: Use nullable columns
     # integer_sequence :optional_seq, allow_nil?: true
-    # feistel_cipher_target :optional_id, allow_nil?: true
+    # feistel_encrypted :optional_id, from: :optional_seq, allow_nil?: true
     
     # Option 4: Use any integer attribute as source (not just integer_sequence)
     # attribute :custom_seq, :integer, allow_nil?: false
-    # feistel_cipher_target :custom_id, allow_nil?: false
-  end
-
-  feistel_cipher do
-    functions_prefix "accounts" # PostgreSQL schema where feistel functions are installed. Default is "public".
+    # feistel_encrypted :custom_id, from: :custom_seq, allow_nil?: false
     
-    encrypt do
-      source :seq # Source can be any integer attribute (integer_sequence or regular integer)
-      target :id # Target attribute for the encrypted value
-      bits 40 # Specifies the maximum number of bits for both the source and target integers.
-    end
-
-    encrypt do
-      source :seq # Multiple encrypts can share the same source
-      target :referral_code
-      key 12345 # Custom encryption key (0 to 2^31-1) or derive automatically from attributes.
-    end
+    # Option 5: Customize encryption parameters
+    # feistel_encrypted :id, from: :seq, bits: 40, functions_prefix: "accounts", primary_key?: true
   end
 end
 ```
 
 ### Understanding Source Attributes
 
-The `source` in an `encrypt` block can be **any integer attribute**:
+The `from` option in `feistel_encrypted` can reference **any integer attribute**:
 
 - **`integer_sequence`**: A convenience utility that declares an auto-generated bigserial column (similar to `AUTO_INCREMENT` or `SERIAL`). While the value is auto-generated on insert, you can specify `allow_nil?: true` if you need to allow updates that set the value to nil.
 - **Regular integer attributes**: You can use any integer attribute as the source, whether it's manually assigned or generated through other means. The attribute just needs to be of type `:integer`. **Both nullable (`allow_nil?: true`) and non-nullable columns are supported**.
@@ -127,23 +114,11 @@ Example with custom source:
 attributes do
   # Non-nullable source
   attribute :my_number, :integer, allow_nil?: false
-  feistel_cipher_target :encrypted_number, allow_nil?: false
+  feistel_encrypted :encrypted_number, from: :my_number, allow_nil?: false
   
   # Nullable source
   attribute :optional_number, :integer, allow_nil?: true
-  feistel_cipher_target :optional_encrypted, allow_nil?: true
-end
-
-feistel_cipher do
-  encrypt do
-    source :my_number
-    target :encrypted_number
-  end
-  
-  encrypt do
-    source :optional_number
-    target :optional_encrypted
-  end
+  feistel_encrypted :optional_encrypted, from: :optional_number, allow_nil?: true
 end
 ```
 
@@ -159,47 +134,66 @@ will generate a migration that sets up a database trigger to encrypt the `seq` a
 
 - **`integer_sequence`**: A convenience helper that creates an auto-incrementing bigserial column (equivalent to `attribute :name, :integer, writable?: false, generated?: true`). Use this when you want a sequential source column that automatically increments. You can also use a regular `attribute :name, :integer` instead.
 
-- **`feistel_cipher_target`**: A convenience helper that creates an integer column with `writable?: false` and `generated?: true` (equivalent to `attribute :name, :integer, writable?: false, generated?: true`). Use this for encrypted output columns. You should set `allow_nil?` to match your source attribute's nullability. **Important**: When you use `feistel_cipher_target`, you must add a corresponding `encrypt` block - otherwise you'll get a compilation error. You can also use a regular `attribute :name, :integer, writable?: false, generated?: true` instead.
+- **`feistel_encrypted`**: A convenience helper that creates an integer column with `writable?: false` and `generated?: true` (equivalent to `attribute :name, :integer, writable?: false, generated?: true`), and configures all encryption parameters. Use this for encrypted output columns. You should set `allow_nil?` to match your source attribute's nullability. You can also use a regular `attribute :name, :integer, writable?: false, generated?: true` instead.
 
-- **Using regular `attribute` instead of helpers**: Both `integer_sequence` and `feistel_cipher_target` are just convenience helpers. You can use regular `attribute` declarations instead:
+- **Using regular `attribute` instead of helpers**: Both `integer_sequence` and `feistel_encrypted` are just convenience helpers. You can use regular `attribute` declarations instead:
   ```elixir
   # Using helpers (recommended for clarity)
   integer_sequence :seq
-  feistel_cipher_target :id, primary_key?: true, allow_nil?: false
+  feistel_encrypted :id, from: :seq, primary_key?: true, allow_nil?: false
   
   # Equivalent with regular attributes
   attribute :seq, :integer, writable?: false, generated?: true
   attribute :id, :integer, writable?: false, generated?: true, primary_key?: true, allow_nil?: false
   ```
+  Note: When using regular `attribute` instead of `feistel_encrypted`, you won't get encryption functionality.
 
 - **Nullable columns**: Both source and target attributes support `allow_nil?: true`. When your source allows nil, the target should also allow nil.
 
-- **`source` in `encrypt` block**: Can be any integer attribute - not limited to `integer_sequence`. You can use any integer column as the source for encryption.
+- **`from` in `feistel_encrypted`**: Can be any integer attribute - not limited to `integer_sequence`. You can use any integer column as the source for encryption.
 
 - **Multiple encrypts from same source**: You can encrypt the same source value into multiple different targets with different encryption keys for different use cases (e.g., public IDs and referral codes).
 
+- **Encryption parameters**: Each `feistel_encrypted` attribute supports the following options:
+  - `from` (required): Source attribute name
+  - `bits` (default: 52): Number of bits for encryption
+  - `key` (optional): Custom encryption key
+  - `rounds` (default: 16): Number of Feistel rounds
+  - `functions_prefix` (default: "public"): PostgreSQL schema where Feistel functions are installed
+
 ### Validation
 
-The library includes a verifier that ensures every `feistel_cipher_target` attribute has a corresponding `encrypt` configuration. This prevents the common mistake of declaring a target attribute but forgetting to configure its encryption:
+The library includes verifiers that ensure proper configuration:
+
+1. **Missing `from` option**: Every `feistel_encrypted` attribute must have a `from` option specified:
 
 ```elixir
 # ❌ This will raise a compilation error:
 attributes do
   integer_sequence :seq
-  feistel_cipher_target :id  # Missing encrypt configuration!
+  feistel_encrypted :id  # Missing from option!
 end
 
 # ✅ This is correct:
 attributes do
   integer_sequence :seq
-  feistel_cipher_target :id
+  feistel_encrypted :id, from: :seq
+end
+```
+
+2. **Nullable column consistency**: When a source attribute allows nil, the target attribute should also allow nil:
+
+```elixir
+# ❌ This will raise a compilation error:
+attributes do
+  integer_sequence :seq, allow_nil?: true
+  feistel_encrypted :id, from: :seq, allow_nil?: false  # Mismatch!
 end
 
-feistel_cipher do
-  encrypt do
-    source :seq
-    target :id
-  end
+# ✅ This is correct:
+attributes do
+  integer_sequence :seq, allow_nil?: true
+  feistel_encrypted :id, from: :seq, allow_nil?: true
 end
 ```
 
