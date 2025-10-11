@@ -44,7 +44,7 @@ if Code.ensure_loaded?(Igniter) do
         # dependencies to add
         adds_deps: [],
         # dependencies to add and call their associated installers, if they exist
-        installs: [{:feistel_cipher, "~> 0.9.3"}],
+        installs: [{:feistel_cipher, "~> 0.10.0"}],
         # An example invocation
         example: __MODULE__.Docs.example(),
         # A list of environments that this should be installed in.

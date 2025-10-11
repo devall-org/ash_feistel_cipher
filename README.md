@@ -1,17 +1,18 @@
 # AshFeistelCipher
 
-Unpredictable integer IDs for Ash resources - no UUIDs needed 
+Unpredictable integer IDs for Ash resources - UUID alternative using Feistel cipher
 
-## Why Use This?
+## Overview
 
-**Problem**: Sequential IDs (1, 2, 3...) expose sensitive business information:
-- Competitors can track your growth rate by checking IDs over time
-- Users can enumerate all resources (`/posts/1`, `/posts/2`...)
-- Total record counts are publicly visible
+Sequential IDs (1, 2, 3...) leak business information. This library provides a declarative DSL to configure [Feistel cipher](https://github.com/devall-org/feistel_cipher) encryption in your Ash resources, transforming sequential integers into non-sequential, unpredictable values automatically via database triggers.
 
-**Solution**: This library uses a [Feistel cipher](https://en.wikipedia.org/wiki/Feistel_cipher) to transform sequential integers into non-sequential, unpredictable values. You keep a sequential column for ordering, and an encrypted column as the primary key. Only the encrypted ID is exposed in APIs and URLs. The transformation is deterministic, collision-free, and automatically handled via database triggers integrated with Ash.
+**Key Benefits:**
+- **No UUIDs needed**: Keep efficient integer IDs (stored as bigint) with configurable ID ranges per column
+- **Ash-native**: Declarative configuration using Ash resource DSL
+- **Automatic encryption**: Database triggers handle encryption transparently
+- **Collision-free**: Deterministic one-to-one mapping
 
-For more details on the algorithm and implementation, see [feistel_cipher](https://github.com/devall-org/feistel_cipher).
+> For detailed information about the Feistel cipher algorithm, how it works, security properties, and performance benchmarks, see the [feistel_cipher](https://github.com/devall-org/feistel_cipher) library documentation.
 
 ## Installation
 
@@ -24,13 +25,12 @@ mix igniter.install ash_feistel_cipher
 You can customize the installation with the following options:
 
 * `--repo` or `-r`: Specify an Ecto repo for FeistelCipher to use.
-* `--functions-prefix` or `-p`: Specify the PostgreSQL schema prefix where the FeistelCipher functions will be created, defaults to `public`.
 * `--functions-salt` or `-s`: Specify the constant value used in the Feistel cipher algorithm. Changing this value will result in different cipher outputs for the same input, should be less than 2^31, defaults to `1_076_943_109`.
 
-Example with custom options:
+Example with custom salt:
 
 ```bash
-mix igniter.install ash_feistel_cipher --functions-prefix accounts --functions-salt 123456789
+mix igniter.install ash_feistel_cipher --functions-salt 123456789
 ```
 
 ### Manual Installation
@@ -53,10 +53,10 @@ If you need more control over the installation process, you can install manually
    mix deps.get
    ```
 
-3. Install FeistelCipher separately with custom options if needed:
+3. Install FeistelCipher separately:
 
    ```bash
-   mix igniter.install feistel_cipher --repo MyApp.Repo --functions-prefix accounts
+   mix igniter.install feistel_cipher --repo MyApp.Repo
    ```
 
 4. Add `:ash_feistel_cipher` to your formatter configuration in `.formatter.exs`:
@@ -69,7 +69,9 @@ If you need more control over the installation process, you can install manually
 
 ## Usage
 
-Use `AshFeistelCipher` in your `Ash.Resource` and configure `feistel_encrypted` attributes as follows:
+### Quick Start
+
+Add `AshFeistelCipher` extension to your Ash resource and use the declarative DSL:
 
 ```elixir
 defmodule MyApp.Post do
@@ -78,128 +80,100 @@ defmodule MyApp.Post do
     extensions: [AshFeistelCipher]
 
   attributes do
-    # Option 1: Use convenience helpers (recommended for clarity)
     integer_sequence :seq
     feistel_encrypted :id, from: :seq, primary_key?: true, allow_nil?: false
-    feistel_encrypted :referral_code, from: :seq, key: 12345, allow_nil?: false
     
-    # Option 2: Use regular attributes (equivalent to Option 1)
-    # attribute :seq, :integer, writable?: false, generated?: true
-    # attribute :id, :integer, writable?: false, generated?: true, from: :seq, primary_key?: true, allow_nil?: false
-    # attribute :referral_code, :integer, writable?: false, generated?: true, from: :seq, key: 12345, allow_nil?: false
-    
-    # Option 3: Use nullable columns
-    # integer_sequence :optional_seq, allow_nil?: true
-    # feistel_encrypted :optional_id, from: :optional_seq, allow_nil?: true
-    
-    # Option 4: Use any integer attribute as source (not just integer_sequence)
-    # attribute :custom_seq, :integer, allow_nil?: false
-    # feistel_encrypted :custom_id, from: :custom_seq, allow_nil?: false
-    
-    # Option 5: Customize encryption parameters
-    # feistel_encrypted :id, from: :seq, bits: 40, functions_prefix: "accounts", primary_key?: true
+    attribute :title, :string, allow_nil?: false
+    timestamps()
   end
 end
 ```
 
-### Understanding Source Attributes
-
-The `from` option in `feistel_encrypted` can reference **any integer attribute**:
-
-- **`integer_sequence`**: A convenience utility that declares an auto-generated bigserial column (similar to `AUTO_INCREMENT` or `SERIAL`). While the value is auto-generated on insert, you can specify `allow_nil?: true` if you need to allow updates that set the value to nil.
-- **Regular integer attributes**: You can use any integer attribute as the source, whether it's manually assigned or generated through other means. The attribute just needs to be of type `:integer`. **Both nullable (`allow_nil?: true`) and non-nullable columns are supported**.
-
-Example with custom source:
-```elixir
-attributes do
-  # Non-nullable source
-  attribute :my_number, :integer, allow_nil?: false
-  feistel_encrypted :encrypted_number, from: :my_number, allow_nil?: false
-  
-  # Nullable source
-  attribute :optional_number, :integer, allow_nil?: true
-  feistel_encrypted :optional_encrypted, from: :optional_number, allow_nil?: true
-end
-```
-
-Then,
-
-```
+Generate the migration:
+```bash
 mix ash.codegen create_post
 ```
 
-will generate a migration that sets up a database trigger to encrypt the `seq` attribute into the `id` attribute using a Feistel cipher.
+This creates a migration with database triggers that automatically encrypt `seq` into `id`.
 
-### Key Concepts
+### Advanced Examples
 
-- **`integer_sequence`**: A convenience helper that creates an auto-incrementing bigserial column (equivalent to `attribute :name, :integer, writable?: false, generated?: true`). Use this when you want a sequential source column that automatically increments. You can also use a regular `attribute :name, :integer` instead.
-
-- **`feistel_encrypted`**: A convenience helper that creates an integer column with `writable?: false` and `generated?: true` (equivalent to `attribute :name, :integer, writable?: false, generated?: true`), and configures all encryption parameters. Use this for encrypted output columns. You should set `allow_nil?` to match your source attribute's nullability. You can also use a regular `attribute :name, :integer, writable?: false, generated?: true` instead.
-
-- **Using regular `attribute` instead of helpers**: Both `integer_sequence` and `feistel_encrypted` are just convenience helpers. You can use regular `attribute` declarations instead:
-  ```elixir
-  # Using helpers (recommended for clarity)
-  integer_sequence :seq
-  feistel_encrypted :id, from: :seq, primary_key?: true, allow_nil?: false
-  
-  # Equivalent with regular attributes
-  attribute :seq, :integer, writable?: false, generated?: true
-  attribute :id, :integer, writable?: false, generated?: true, primary_key?: true, allow_nil?: false
-  ```
-  Note: When using regular `attribute` instead of `feistel_encrypted`, you won't get encryption functionality.
-
-- **Nullable columns**: Both source and target attributes support `allow_nil?: true`. When your source allows nil, the target should also allow nil.
-
-- **`from` in `feistel_encrypted`**: Can be any integer attribute - not limited to `integer_sequence`. You can use any integer column as the source for encryption.
-
-- **Multiple encrypts from same source**: You can encrypt the same source value into multiple different targets with different encryption keys for different use cases (e.g., public IDs and referral codes).
-
-- **Encryption parameters**: Each `feistel_encrypted` attribute supports the following options:
-  - `from` (required): Source attribute name
-  - `bits` (default: 52): Number of bits for encryption
-  - `key` (optional): Custom encryption key
-  - `rounds` (default: 16): Number of Feistel rounds
-  - `functions_prefix` (default: "public"): PostgreSQL schema where Feistel functions are installed
-
-### Validation
-
-The library includes verifiers that ensure proper configuration:
-
-1. **Missing `from` option**: Every `feistel_encrypted` attribute must have a `from` option specified:
-
+**Multiple encrypted fields from same source:**
 ```elixir
-# ❌ This will raise a compilation error:
 attributes do
   integer_sequence :seq
-  feistel_encrypted :id  # Missing from option!
-end
-
-# ✅ This is correct:
-attributes do
-  integer_sequence :seq
-  feistel_encrypted :id, from: :seq
+  feistel_encrypted :id, from: :seq, primary_key?: true
+  feistel_encrypted :referral_code, from: :seq, key: 12345  # Different key for referral codes
 end
 ```
 
-2. **Nullable column consistency**: When a source attribute allows nil, the target attribute should also allow nil:
-
+**Custom encryption parameters:**
 ```elixir
-# ❌ This will raise a compilation error:
 attributes do
-  integer_sequence :seq, allow_nil?: true
-  feistel_encrypted :id, from: :seq, allow_nil?: false  # Mismatch!
-end
-
-# ✅ This is correct:
-attributes do
-  integer_sequence :seq, allow_nil?: true
-  feistel_encrypted :id, from: :seq, allow_nil?: true
+  integer_sequence :seq
+  feistel_encrypted :id, 
+    from: :seq,
+    bits: 40,     # Encryption bit size - determines ID range (default: 52)
+    rounds: 8     # Feistel rounds (default: 16)
 end
 ```
+
+**Using any integer attribute as source:**
+```elixir
+attributes do
+  attribute :custom_number, :integer
+  feistel_encrypted :encrypted_number, from: :custom_number
+end
+```
+
+**Nullable columns:**
+```elixir
+attributes do
+  integer_sequence :optional_seq, allow_nil?: true
+  feistel_encrypted :optional_id, from: :optional_seq, allow_nil?: true
+end
+```
+
+### DSL Reference
+
+**`integer_sequence`**: Auto-incrementing bigserial column
+```elixir
+integer_sequence :seq                        # Non-nullable
+integer_sequence :optional_seq, allow_nil?: true  # Nullable
+```
+
+**`feistel_encrypted`**: Encrypted integer column with automatic trigger
+
+Required options:
+- `from`: Source attribute name
+
+Optional parameters:
+- `bits` (default: 52): Encryption bit size - determines ID range (40 bits = ~1T IDs, 52 bits = ~4.5Q IDs)
+- `key`: Custom encryption key for different outputs from same source
+- `rounds` (default: 16): Number of Feistel rounds (more = more secure)
+
+**Important**: 
+- `allow_nil?` on target must match source attribute's nullability
+- The `from` option can reference any integer attribute, not just `integer_sequence`
+
+> **Note**: For detailed parameter explanations (bits, rounds, performance), see [feistel_cipher Trigger Options](https://github.com/devall-org/feistel_cipher#trigger-options).
 
 ## Related Projects
 
-* [feistel_cipher](https://github.com/devall-org/feistel_cipher): The underlying library that provides Ecto migrations and PostgreSQL functions for Feistel cipher operations. `ash_feistel_cipher` builds on top of this to integrate the capability seamlessly into the Ash framework.
+### [feistel_cipher](https://github.com/devall-org/feistel_cipher)
+
+The underlying library that provides the core Feistel cipher implementation for Ecto. `ash_feistel_cipher` builds on top of `feistel_cipher` to provide Ash-native declarative configuration.
+
+**Use `feistel_cipher` directly if you're:**
+- Using plain Ecto without Ash Framework
+- Need manual control over migrations and triggers
+
+**Use `ash_feistel_cipher` if you're:**
+- Using Ash Framework
+- Want declarative DSL configuration in Ash resources
+- Prefer automatic migration generation via `mix ash.codegen`
+
+For technical details about the algorithm, security properties, and performance benchmarks, see the [`feistel_cipher` documentation](https://github.com/devall-org/feistel_cipher).
 
 ## License
 
