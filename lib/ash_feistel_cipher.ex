@@ -65,33 +65,45 @@ defmodule AshFeistelCipher do
     end
   end
 
-  @encrypted_integer_schema [
+  # Common Feistel cipher options shared by all encrypted integer types
+  @feistel_options [
     from: [
       type: :atom,
       required: true,
-      doc: "Source attribute for feistel cipher. Can be any integer attribute. Use `integer_sequence` for an auto-generated bigserial column, or use any regular integer attribute."
+      doc:
+        "Source attribute for feistel cipher. Can be any integer attribute. Use `integer_sequence` for an auto-generated bigserial column, or use any regular integer attribute."
     ],
     bits: [
       type: :integer,
       default: 52,
-      doc: "The number of bits the source and target will use. Must be an even number between 2 and 62. Cannot be changed after records are created. Default is 52 for JavaScript interoperability."
+      doc:
+        "The number of bits the source and target will use. Must be an even number between 2 and 62. Cannot be changed after records are created. Default is 52 for JavaScript interoperability."
     ],
     key: [
       type: :integer,
       required: false,
-      doc: "The encryption key to use for the Feistel cipher. Must be between 0 and 2^31-1 (2,147,483,647). If not provided, a key will be derived from the table name, source, target, and bits. Cannot be changed after records are created. You can generate a random key using FeistelCipher.random_key()."
+      doc:
+        "The encryption key to use for the Feistel cipher. Must be between 0 and 2^31-1 (2,147,483,647). If not provided, a key will be derived from the table name, source, target, and bits. Cannot be changed after records are created. You can generate a random key using FeistelCipher.random_key()."
     ],
     rounds: [
       type: :integer,
       default: 16,
-      doc: "Number of Feistel rounds. Must be between 1 and 32. More rounds = more secure but slower. Default is 16 for good security/performance balance. Cannot be changed after records are created."
+      doc:
+        "Number of Feistel rounds. Must be between 1 and 32. More rounds = more secure but slower. Default is 16 for good security/performance balance. Cannot be changed after records are created."
     ],
     functions_prefix: [
       type: :string,
       default: "public",
-      doc: "PostgreSQL schema where feistel cipher functions are installed. Default is 'public' schema."
+      doc:
+        "PostgreSQL schema where feistel cipher functions are installed. Default is 'public' schema."
     ]
-  ] ++ (Ash.Resource.Attribute.attribute_schema() |> Spark.Options.Helpers.set_default!(:writable?, false) |> Spark.Options.Helpers.set_default!(:generated?, true) |> Spark.Options.Helpers.set_default!(:type, :integer))
+  ]
+
+  @encrypted_integer_schema @feistel_options ++
+                              (Ash.Resource.Attribute.attribute_schema()
+                               |> Spark.Options.Helpers.set_default!(:writable?, false)
+                               |> Spark.Options.Helpers.set_default!(:generated?, true)
+                               |> Spark.Options.Helpers.set_default!(:type, :integer))
 
   @encrypted_integer %Spark.Dsl.Entity{
     name: :encrypted_integer,
@@ -117,8 +129,56 @@ defmodule AshFeistelCipher do
     entity: @encrypted_integer
   }
 
+  @encrypted_integer_primary_key_schema @feistel_options ++
+                                          (Ash.Resource.Attribute.attribute_schema()
+                                           |> Spark.Options.Helpers.set_default!(
+                                             :writable?,
+                                             false
+                                           )
+                                           |> Spark.Options.Helpers.set_default!(
+                                             :generated?,
+                                             true
+                                           )
+                                           |> Spark.Options.Helpers.set_default!(:type, :integer)
+                                           |> Spark.Options.Helpers.set_default!(
+                                             :primary_key?,
+                                             true
+                                           )
+                                           |> Spark.Options.Helpers.set_default!(
+                                             :allow_nil?,
+                                             false
+                                           )
+                                           |> Spark.Options.Helpers.set_default!(:public?, true))
+
+  @encrypted_integer_primary_key %Spark.Dsl.Entity{
+    name: :encrypted_integer_primary_key,
+    describe: """
+    Declares an encrypted integer primary key column for Feistel cipher.
+    This is a convenience utility that sets primary_key?: true, allow_nil?: false, public?: true, writable?: false, and generated?: true automatically.
+    All encryption configuration is specified directly on the attribute.
+    """,
+    examples: [
+      "encrypted_integer_primary_key :id, from: :seq",
+      "encrypted_integer_primary_key :id, from: :seq, bits: 40",
+      "encrypted_integer_primary_key :id, from: :seq, key: 12345, rounds: 8"
+    ],
+    args: [:name],
+    target: AshFeistelCipher.FeistelEncrypted,
+    schema: @encrypted_integer_primary_key_schema,
+    transform: {__MODULE__, :mark_as_feistel_encrypted, []}
+  }
+
+  @encrypted_integer_primary_key_patch %Spark.Dsl.Patch.AddEntity{
+    section_path: [:attributes],
+    entity: @encrypted_integer_primary_key
+  }
+
   use Spark.Dsl.Extension,
-    dsl_patches: [@integer_sequence_patch, @encrypted_integer_patch],
+    dsl_patches: [
+      @integer_sequence_patch,
+      @encrypted_integer_patch,
+      @encrypted_integer_primary_key_patch
+    ],
     transformers: [AshFeistelCipher.Transformer],
     verifiers: [
       AshFeistelCipher.Verifier.MissingSource,
