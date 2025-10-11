@@ -42,6 +42,7 @@ defmodule AshFeistelCipher.Verifier.AllowNilConsistency do
         error_details =
           Enum.map_join(attrs_with_issues, "\n", fn attr ->
             source_name = Map.get(attr, :__feistel_from__)
+
             "  - from: #{inspect(source_name)} (allow_nil?: true), target: #{inspect(attr.name)} (allow_nil?: false)"
           end)
 

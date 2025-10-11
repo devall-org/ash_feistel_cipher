@@ -181,3 +181,41 @@ defmodule AshFeistelCipher.Test.CustomRoundsResource do
     )
   end
 end
+
+defmodule AshFeistelCipher.Test.PrimaryKeyResource do
+  @moduledoc false
+  use Ash.Resource,
+    domain: AshFeistelCipher.Test.Domain,
+    data_layer: AshPostgres.DataLayer,
+    extensions: [AshFeistelCipher]
+
+  postgres do
+    table("primary_key_resources")
+    repo(AshFeistelCipher.Test.Repo)
+  end
+
+  attributes do
+    integer_sequence(:seq)
+    encrypted_integer_primary_key(:id, from: :seq)
+    attribute(:name, :string)
+  end
+end
+
+defmodule AshFeistelCipher.Test.PrimaryKeyCustomOptionsResource do
+  @moduledoc false
+  use Ash.Resource,
+    domain: AshFeistelCipher.Test.Domain,
+    data_layer: AshPostgres.DataLayer,
+    extensions: [AshFeistelCipher]
+
+  postgres do
+    table("primary_key_custom_resources")
+    repo(AshFeistelCipher.Test.Repo)
+  end
+
+  attributes do
+    integer_sequence(:seq)
+    encrypted_integer_primary_key(:id, from: :seq, bits: 40, key: 12345, rounds: 8)
+    attribute(:name, :string)
+  end
+end

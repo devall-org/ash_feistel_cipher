@@ -81,7 +81,7 @@ defmodule MyApp.Post do
 
   attributes do
     integer_sequence :seq
-    encrypted_integer :id, from: :seq, primary_key?: true, allow_nil?: false
+    encrypted_integer_primary_key :id, from: :seq  # Convenience shorthand!
     
     attribute :title, :string, allow_nil?: false
     timestamps()
@@ -102,7 +102,7 @@ This creates a migration with database triggers that automatically encrypt `seq`
 ```elixir
 attributes do
   integer_sequence :seq
-  encrypted_integer :id, from: :seq, primary_key?: true
+  encrypted_integer_primary_key :id, from: :seq
   encrypted_integer :referral_code, from: :seq, key: 12345  # Different key for referral codes
 end
 ```
@@ -142,6 +142,31 @@ integer_sequence :seq                        # Non-nullable
 integer_sequence :optional_seq, allow_nil?: true  # Nullable
 ```
 
+**`encrypted_integer_primary_key`**: Encrypted integer primary key with automatic trigger (convenience shorthand)
+
+This is a convenience macro that automatically sets:
+- `primary_key?: true`
+- `allow_nil?: false`
+- `public?: true`
+- `writable?: false`
+- `generated?: true`
+
+Required options:
+- `from`: Source attribute name
+
+Optional parameters:
+- `bits` (default: 52): Encryption bit size - determines ID range (40 bits = ~1T IDs, 52 bits = ~4.5Q IDs)
+- `key`: Custom encryption key for different outputs from same source
+- `rounds` (default: 16): Number of Feistel rounds (more = more secure)
+- `functions_prefix` (default: "public"): PostgreSQL schema where feistel functions are installed
+
+Examples:
+```elixir
+encrypted_integer_primary_key :id, from: :seq
+encrypted_integer_primary_key :id, from: :seq, bits: 40
+encrypted_integer_primary_key :id, from: :seq, key: 12345, rounds: 8
+```
+
 **`encrypted_integer`**: Encrypted integer column with automatic trigger
 
 Required options:
@@ -155,6 +180,7 @@ Optional parameters:
 **Important**: 
 - `allow_nil?` on target must match source attribute's nullability
 - The `from` option can reference any integer attribute, not just `integer_sequence`
+- For primary keys, prefer `encrypted_integer_primary_key` for cleaner syntax
 
 > **Note**: For detailed parameter explanations (bits, rounds, performance), see [feistel_cipher Trigger Options](https://github.com/devall-org/feistel_cipher#trigger-options).
 

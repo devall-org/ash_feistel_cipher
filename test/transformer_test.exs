@@ -226,4 +226,73 @@ defmodule AshFeistelCipher.TransformerTest do
       assert AshFeistelCipher.Transformer.before?(SomeOtherTransformer) == true
     end
   end
+
+  describe "encrypted_integer_primary_key" do
+    test "sets primary_key, allow_nil, and public defaults" do
+      statements = get_custom_statements(AshFeistelCipher.Test.PrimaryKeyResource)
+
+      assert length(statements) == 1
+      [statement] = statements
+
+      # Verify trigger is created correctly
+      assert statement.up =~ "CREATE TRIGGER"
+      assert statement.up =~ "primary_key_resources_encrypt_seq_to_id_trigger"
+      assert statement.up =~ "public.primary_key_resources"
+
+      # Verify the attribute has correct defaults via Ash.Resource.Info
+      resource = AshFeistelCipher.Test.PrimaryKeyResource
+      id_attr = Ash.Resource.Info.attribute(resource, :id)
+
+      assert id_attr.primary_key? == true
+      assert id_attr.allow_nil? == false
+      assert id_attr.public? == true
+      assert id_attr.writable? == false
+      assert id_attr.generated? == true
+    end
+
+    test "allows overriding encryption options (bits, key, rounds)" do
+      statements = get_custom_statements(AshFeistelCipher.Test.PrimaryKeyCustomOptionsResource)
+
+      assert length(statements) == 1
+      [statement] = statements
+
+      # Verify custom bits (40)
+      assert statement.up =~ "40"
+      refute statement.up =~ "52"
+
+      # Verify custom key (12345)
+      assert statement.up =~ "12345"
+
+      # Verify custom rounds (8)
+      assert statement.up =~ ", 8)"
+      refute statement.up =~ ", 16)"
+
+      # Verify the attribute still has primary_key defaults
+      resource = AshFeistelCipher.Test.PrimaryKeyCustomOptionsResource
+      id_attr = Ash.Resource.Info.attribute(resource, :id)
+
+      assert id_attr.primary_key? == true
+      assert id_attr.allow_nil? == false
+      assert id_attr.public? == true
+    end
+
+    test "generates correct trigger SQL" do
+      statements = get_custom_statements(AshFeistelCipher.Test.PrimaryKeyResource)
+
+      [statement] = statements
+
+      # Verify SQL structure
+      assert statement.up =~ "CREATE TRIGGER"
+      assert statement.up =~ "BEFORE INSERT OR UPDATE"
+      assert statement.up =~ "FOR EACH ROW"
+      assert statement.up =~ "feistel_column_trigger"
+      assert statement.up =~ "'seq'"
+      assert statement.up =~ "'id'"
+
+      # Verify down SQL
+      assert statement.down =~ "DROP TRIGGER"
+      assert statement.down =~ "primary_key_resources_encrypt_seq_to_id_trigger"
+      assert statement.down =~ "RAISE EXCEPTION"
+    end
+  end
 end
