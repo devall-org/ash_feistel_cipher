@@ -129,7 +129,8 @@ defmodule AshFeistelCipher do
     schema:
       Ash.Resource.Attribute.attribute_schema()
       |> Spark.Options.Helpers.set_default!(:type, :integer)
-      |> Spark.Options.Helpers.set_default!(:generated?, true),
+      |> Spark.Options.Helpers.set_default!(:generated?, true)
+      |> Spark.Options.Helpers.set_default!(:allow_nil?, false),
     transform: {Ash.Resource.Attribute, :transform, []}
   }
 
@@ -176,5 +177,8 @@ defmodule AshFeistelCipher do
     sections: [@feistel_cipher],
     dsl_patches: [@integer_sequence_patch, @feistel_cipher_target_patch],
     transformers: [AshFeistelCipher.Transformer],
-    verifiers: [AshFeistelCipher.Verifier]
+    verifiers: [
+      AshFeistelCipher.Verifier.MissingEncrypt,
+      AshFeistelCipher.Verifier.AllowNilConsistency
+    ]
 end

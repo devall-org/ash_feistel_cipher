@@ -1,4 +1,4 @@
-defmodule AshFeistelCipher.Verifier do
+defmodule AshFeistelCipher.Verifier.MissingEncrypt do
   @moduledoc """
   Verifies that all `feistel_cipher_target` attributes have corresponding `encrypt` configurations.
   """
