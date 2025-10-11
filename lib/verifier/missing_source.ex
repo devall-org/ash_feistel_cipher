@@ -1,6 +1,6 @@
 defmodule AshFeistelCipher.Verifier.MissingSource do
   @moduledoc """
-  Verifies that all `feistel_encrypted` attributes have a `from` configured.
+  Verifies that all `encrypted_integer` attributes have a `from` configured.
   """
   use Spark.Dsl.Verifier
 
@@ -11,7 +11,7 @@ defmodule AshFeistelCipher.Verifier.MissingSource do
     # Get all attributes
     attributes = Verifier.get_entities(dsl_state, [:attributes])
 
-    # Find attributes defined with feistel_encrypted
+    # Find attributes defined with encrypted_integer
     # These have the __feistel_cipher_target__ marker
     feistel_targets =
       attributes
@@ -19,7 +19,7 @@ defmodule AshFeistelCipher.Verifier.MissingSource do
         Map.get(attr, :__feistel_cipher_target__, false)
       end)
 
-    # Find feistel_encrypted that don't have a from
+    # Find encrypted_integer that don't have a from
     missing_from =
       feistel_targets
       |> Enum.filter(fn attr ->
@@ -32,14 +32,14 @@ defmodule AshFeistelCipher.Verifier.MissingSource do
        Spark.Error.DslError.exception(
          module: Verifier.get_persisted(dsl_state, :module),
          message: """
-         The following attributes are declared as `feistel_encrypted` but have no `from` configured:
+         The following attributes are declared as `encrypted_integer` but have no `from` configured:
          #{Enum.map_join(missing_from, ", ", &inspect/1)}
 
          Please specify a from attribute:
 
-             feistel_encrypted :#{List.first(missing_from) || "attribute"}, from: :seq
+             encrypted_integer :#{List.first(missing_from) || "attribute"}, from: :seq
 
-         Or use `attribute` instead of `feistel_encrypted` if encryption is not needed.
+         Or use `attribute` instead of `encrypted_integer` if encryption is not needed.
          """,
          path: [:attributes]
        )}
