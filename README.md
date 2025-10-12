@@ -85,7 +85,6 @@ defmodule MyApp.Post do
     encrypted_integer_primary_key :id, from: :seq
     
     attribute :title, :string, allow_nil?: false
-    timestamps()
   end
 end
 ```
@@ -107,7 +106,6 @@ defmodule MyApp.Repo.Migrations.CreatePost do
       add :seq, :bigserial, null: false
       add :id, :bigint, null: false, primary_key: true
       add :title, :string, null: false
-      timestamps()
     end
 
     # Automatically generates trigger for seq -> id encryption
@@ -132,7 +130,7 @@ end
 When you create a record, the database trigger automatically encrypts the sequential `seq` value:
 
 ```elixir
-# Create a post - only provide title, seq and id are auto-generated
+# Create a post - seq and id are auto-generated
 post = MyApp.Post.create!(%{title: "Hello World"})
 # => %MyApp.Post{seq: 1, id: 3_141_592_653, title: "Hello World"}
 
