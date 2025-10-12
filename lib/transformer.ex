@@ -42,11 +42,14 @@ defmodule AshFeistelCipher.Transformer do
     functions_prefix = functions_prefix || "public"
     key = key || FeistelCipher.generate_key(prefix, table, source, target)
 
+    # Format key with underscores for readability
+    key_formatted = format_number_with_underscores(key)
+
     up = """
     execute(
       FeistelCipher.up_for_trigger(#{inspect(prefix)}, #{inspect(table)}, #{inspect(source)}, #{inspect(target)},
         bits: #{bits},
-        key: #{key},
+        key: #{key_formatted},
         rounds: #{rounds},
         functions_prefix: #{inspect(functions_prefix)}
       )
@@ -78,5 +81,15 @@ defmodule AshFeistelCipher.Transformer do
       dsl_state |> Transformer.get_entities([:attributes]) |> Enum.find(&(&1.name == attr_name))
 
     db_column_name
+  end
+
+  defp format_number_with_underscores(number) when is_integer(number) do
+    number
+    |> Integer.to_string()
+    |> String.reverse()
+    |> String.graphemes()
+    |> Enum.chunk_every(3)
+    |> Enum.join("_")
+    |> String.reverse()
   end
 end
