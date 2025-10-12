@@ -36,15 +36,22 @@ defmodule AshFeistelCipher.Transformer do
     table = dsl_state |> Transformer.get_option([:postgres], :table)
     prefix = dsl_state |> Transformer.get_option([:postgres], :schema) || "public"
 
-    up =
-      FeistelCipher.up_for_trigger(prefix, table, source, target,
-        bits: bits,
-        key: key,
-        rounds: rounds,
-        functions_prefix: functions_prefix
+    up = """
+    execute(
+      FeistelCipher.up_for_trigger(#{inspect(prefix)}, #{inspect(table)}, #{inspect(source)}, #{inspect(target)},
+        bits: #{bits},
+        key: #{inspect(key)},
+        rounds: #{rounds},
+        functions_prefix: #{inspect(functions_prefix)}
       )
+    )
+    """
 
-    down = FeistelCipher.down_for_trigger(prefix, table, source, target)
+    down = """
+    execute(
+      FeistelCipher.down_for_trigger(#{inspect(prefix)}, #{inspect(table)}, #{inspect(source)}, #{inspect(target)})
+    )
+    """
 
     {:ok, statement} =
       Transformer.build_entity(
@@ -52,6 +59,7 @@ defmodule AshFeistelCipher.Transformer do
         [:postgres, :custom_statements],
         :statement,
         name: :feistel_cipher,
+        code?: true,
         up: up,
         down: down
       )
