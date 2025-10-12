@@ -72,19 +72,19 @@ defmodule AshFeistelCipher do
       type: :atom,
       required: true,
       doc:
-        "Source attribute for feistel cipher. Can be any integer attribute. Use `integer_sequence` for an auto-generated bigserial column, or use any regular integer attribute."
+        "Integer attribute to encrypt. Can be any integer attribute. Use `integer_sequence` for an auto-generated bigserial column, or use any regular integer attribute."
     ],
     bits: [
       type: :integer,
       default: 52,
       doc:
-        "The number of bits the source and target will use. Must be an even number between 2 and 62. Cannot be changed after records are created. Default is 52 for JavaScript interoperability."
+        "The number of bits for encryption. Must be an even number between 2 and 62. Cannot be changed after records are created. Default is 52 for JavaScript interoperability."
     ],
     key: [
       type: :integer,
       required: false,
       doc:
-        "The encryption key to use for the Feistel cipher. Must be between 0 and 2^31-1 (2,147,483,647). If not provided, a key will be derived from the table name, source, target, and bits. Cannot be changed after records are created. You can generate a random key using FeistelCipher.random_key()."
+        "The encryption key to use for the Feistel cipher. Must be between 0 and 2^31-1 (2,147,483,647). If not provided, a key will be derived from the table name, column names, and bits. Cannot be changed after records are created."
     ],
     rounds: [
       type: :integer,

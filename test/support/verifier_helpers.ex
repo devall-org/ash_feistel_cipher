@@ -26,7 +26,7 @@ defmodule AshFeistelCipher.VerifierHelpers do
   ## Options
   - `:is_encrypted` - Whether this is an encrypted_integer attribute (default: false)
   - `:allow_nil?` - Whether the attribute allows nil (default: false)
-  - `:from` - Source attribute for encrypted_integer (required if is_encrypted is true)
+  - `:from` - Integer attribute to encrypt (required if is_encrypted is true)
   """
   def build_attribute(name, opts \\ []) do
     is_encrypted = Keyword.get(opts, :is_encrypted, false)
