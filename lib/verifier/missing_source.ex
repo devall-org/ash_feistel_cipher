@@ -12,16 +12,16 @@ defmodule AshFeistelCipher.Verifier.MissingSource do
     attributes = Verifier.get_entities(dsl_state, [:attributes])
 
     # Find attributes defined with encrypted_integer
-    # These have the __feistel_cipher_target__ marker
-    feistel_targets =
+    # These have the __feistel_encrypted__ marker
+    encrypted_attrs =
       attributes
       |> Enum.filter(fn attr ->
-        Map.get(attr, :__feistel_cipher_target__, false)
+        Map.get(attr, :__feistel_encrypted__, false)
       end)
 
     # Find encrypted_integer that don't have a from
     missing_from =
-      feistel_targets
+      encrypted_attrs
       |> Enum.filter(fn attr ->
         is_nil(Map.get(attr, :__feistel_from__))
       end)

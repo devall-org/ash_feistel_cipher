@@ -14,7 +14,7 @@ defmodule AshFeistelCipher.Verifier.MissingSourceTest do
     test "returns :ok when all encrypted_integer attributes have from configured" do
       attributes = [
         build_attribute(:seq),
-        build_attribute(:id, is_target: true, from: :seq)
+        build_attribute(:id, is_encrypted: true, from: :seq)
       ]
 
       dsl_state = build_dsl_state(attributes)
@@ -34,7 +34,7 @@ defmodule AshFeistelCipher.Verifier.MissingSourceTest do
     test "returns error when encrypted_integer has no from configured" do
       attributes = [
         build_attribute(:seq),
-        build_attribute(:id, is_target: true, from: nil)
+        build_attribute(:id, is_encrypted: true, from: nil)
       ]
 
       dsl_state = build_dsl_state(attributes)
@@ -46,8 +46,8 @@ defmodule AshFeistelCipher.Verifier.MissingSourceTest do
     test "returns error with all missing from attributes listed" do
       attributes = [
         build_attribute(:seq),
-        build_attribute(:id, is_target: true, from: nil),
-        build_attribute(:referral_code, is_target: true, from: nil)
+        build_attribute(:id, is_encrypted: true, from: nil),
+        build_attribute(:referral_code, is_encrypted: true, from: nil)
       ]
 
       dsl_state = build_dsl_state(attributes)
@@ -58,11 +58,11 @@ defmodule AshFeistelCipher.Verifier.MissingSourceTest do
       assert error.message =~ ":referral_code"
     end
 
-    test "returns error when only some targets have from configured" do
+    test "returns error when only some encrypted attributes have from configured" do
       attributes = [
         build_attribute(:seq),
-        build_attribute(:id, is_target: true, from: :seq),
-        build_attribute(:referral_code, is_target: true, from: nil)
+        build_attribute(:id, is_encrypted: true, from: :seq),
+        build_attribute(:referral_code, is_encrypted: true, from: nil)
       ]
 
       dsl_state = build_dsl_state(attributes)
@@ -76,7 +76,7 @@ defmodule AshFeistelCipher.Verifier.MissingSourceTest do
     test "error message provides helpful suggestions" do
       attributes = [
         build_attribute(:seq),
-        build_attribute(:user_id, is_target: true, from: nil)
+        build_attribute(:user_id, is_encrypted: true, from: nil)
       ]
 
       dsl_state = build_dsl_state(attributes)
@@ -91,8 +91,8 @@ defmodule AshFeistelCipher.Verifier.MissingSourceTest do
     test "returns :ok for multiple valid encrypted_integer attributes" do
       attributes = [
         build_attribute(:seq),
-        build_attribute(:id, is_target: true, from: :seq),
-        build_attribute(:referral_code, is_target: true, from: :seq)
+        build_attribute(:id, is_encrypted: true, from: :seq),
+        build_attribute(:referral_code, is_encrypted: true, from: :seq)
       ]
 
       dsl_state = build_dsl_state(attributes)

@@ -6,59 +6,59 @@ defmodule AshFeistelCipher.Verifier.AllowNilConsistencyTest do
   @moduledoc """
   Tests for AshFeistelCipher.Verifier.AllowNilConsistency
 
-  The verifier ensures that when a source attribute allows nil,
-  the target attribute also allows nil.
+  The verifier ensures that when a from attribute allows nil,
+  the encrypted attribute also allows nil.
   """
 
   describe "verify/1" do
-    test "returns :ok when both source and target allow nil" do
+    test "returns :ok when both from and encrypted attributes allow nil" do
       attributes = [
         build_attribute(:seq, allow_nil?: true),
-        build_attribute(:id, is_target: true, from: :seq, allow_nil?: true)
+        build_attribute(:id, is_encrypted: true, from: :seq, allow_nil?: true)
       ]
 
       dsl_state = build_dsl_state(attributes)
       assert :ok == AshFeistelCipher.Verifier.AllowNilConsistency.verify(dsl_state)
     end
 
-    test "returns :ok when both source and target don't allow nil" do
+    test "returns :ok when both from and encrypted attributes don't allow nil" do
       attributes = [
         build_attribute(:seq, allow_nil?: false),
-        build_attribute(:id, is_target: true, from: :seq, allow_nil?: false)
+        build_attribute(:id, is_encrypted: true, from: :seq, allow_nil?: false)
       ]
 
       dsl_state = build_dsl_state(attributes)
       assert :ok == AshFeistelCipher.Verifier.AllowNilConsistency.verify(dsl_state)
     end
 
-    test "returns :ok when source doesn't allow nil but target does" do
+    test "returns :ok when from attribute doesn't allow nil but encrypted does" do
       attributes = [
         build_attribute(:seq, allow_nil?: false),
-        build_attribute(:id, is_target: true, from: :seq, allow_nil?: true)
+        build_attribute(:id, is_encrypted: true, from: :seq, allow_nil?: true)
       ]
 
       dsl_state = build_dsl_state(attributes)
       assert :ok == AshFeistelCipher.Verifier.AllowNilConsistency.verify(dsl_state)
     end
 
-    test "returns error when source allows nil but target doesn't" do
+    test "returns error when from attribute allows nil but encrypted doesn't" do
       attributes = [
         build_attribute(:seq, allow_nil?: true),
-        build_attribute(:id, is_target: true, from: :seq, allow_nil?: false)
+        build_attribute(:id, is_encrypted: true, from: :seq, allow_nil?: false)
       ]
 
       dsl_state = build_dsl_state(attributes)
       assert {:error, error} = AshFeistelCipher.Verifier.AllowNilConsistency.verify(dsl_state)
       assert error.message =~ "Nullable column mismatch"
       assert error.message =~ "from: :seq (allow_nil?: true)"
-      assert error.message =~ "target: :id (allow_nil?: false)"
+      assert error.message =~ "encrypted: :id (allow_nil?: false)"
     end
 
     test "returns error for multiple inconsistent encrypts" do
       attributes = [
         build_attribute(:seq, allow_nil?: true),
-        build_attribute(:id, is_target: true, from: :seq, allow_nil?: false),
-        build_attribute(:referral_code, is_target: true, from: :seq, allow_nil?: false)
+        build_attribute(:id, is_encrypted: true, from: :seq, allow_nil?: false),
+        build_attribute(:referral_code, is_encrypted: true, from: :seq, allow_nil?: false)
       ]
 
       dsl_state = build_dsl_state(attributes)
@@ -74,8 +74,8 @@ defmodule AshFeistelCipher.Verifier.AllowNilConsistencyTest do
       attributes = [
         build_attribute(:seq1, allow_nil?: false),
         build_attribute(:seq2, allow_nil?: true),
-        build_attribute(:id1, is_target: true, from: :seq1, allow_nil?: false),
-        build_attribute(:id2, is_target: true, from: :seq2, allow_nil?: false)
+        build_attribute(:id1, is_encrypted: true, from: :seq1, allow_nil?: false),
+        build_attribute(:id2, is_encrypted: true, from: :seq2, allow_nil?: false)
       ]
 
       dsl_state = build_dsl_state(attributes)
@@ -91,7 +91,7 @@ defmodule AshFeistelCipher.Verifier.AllowNilConsistencyTest do
     test "error message provides helpful suggestions" do
       attributes = [
         build_attribute(:seq, allow_nil?: true),
-        build_attribute(:user_id, is_target: true, from: :seq, allow_nil?: false)
+        build_attribute(:user_id, is_encrypted: true, from: :seq, allow_nil?: false)
       ]
 
       dsl_state = build_dsl_state(attributes)
