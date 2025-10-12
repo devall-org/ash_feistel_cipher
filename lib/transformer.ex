@@ -23,15 +23,15 @@ defmodule AshFeistelCipher.Transformer do
   end
 
   defp add_feistel_cipher_trigger(attribute, dsl_state) do
-    source_attr = Map.get(attribute, :__feistel_from__)
-    target_attr = attribute.name
+    from_attr = Map.get(attribute, :__feistel_from__)
+    encrypted_attr = attribute.name
     bits = Map.get(attribute, :__feistel_bits__)
     key = Map.get(attribute, :__feistel_key__)
     rounds = Map.get(attribute, :__feistel_rounds__)
     functions_prefix = Map.get(attribute, :__feistel_functions_prefix__)
 
-    source = get_db_column_name(source_attr, dsl_state)
-    target = get_db_column_name(target_attr, dsl_state)
+    from_column = get_db_column_name(from_attr, dsl_state)
+    encrypted_column = get_db_column_name(encrypted_attr, dsl_state)
 
     table = dsl_state |> Transformer.get_option([:postgres], :table)
     prefix = dsl_state |> Transformer.get_option([:postgres], :schema) || "public"
@@ -40,14 +40,14 @@ defmodule AshFeistelCipher.Transformer do
     bits = bits || 52
     rounds = rounds || 16
     functions_prefix = functions_prefix || "public"
-    key = key || FeistelCipher.generate_key(prefix, table, source, target)
+    key = key || FeistelCipher.generate_key(prefix, table, from_column, encrypted_column)
 
     # Format key with underscores for readability
     key_formatted = format_number_with_underscores(key)
 
     up = """
     execute(
-      FeistelCipher.up_for_trigger(#{inspect(prefix)}, #{inspect(table)}, #{inspect(source)}, #{inspect(target)},
+      FeistelCipher.up_for_trigger(#{inspect(prefix)}, #{inspect(table)}, #{inspect(from_column)}, #{inspect(encrypted_column)},
         bits: #{bits},
         key: #{key_formatted},
         rounds: #{rounds},
@@ -58,7 +58,7 @@ defmodule AshFeistelCipher.Transformer do
 
     down = """
     execute(
-      FeistelCipher.down_for_trigger(#{inspect(prefix)}, #{inspect(table)}, #{inspect(source)}, #{inspect(target)})
+      FeistelCipher.down_for_trigger(#{inspect(prefix)}, #{inspect(table)}, #{inspect(from_column)}, #{inspect(encrypted_column)})
     )
     """
 
