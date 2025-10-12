@@ -9,8 +9,7 @@ Encrypted integer IDs for Ash resources - UUID alternative using Feistel cipher
 Sequential IDs (1, 2, 3...) leak business information. This library provides a declarative DSL to configure [Feistel cipher](https://github.com/devall-org/feistel_cipher) encryption in your Ash resources, transforming sequential integers into non-sequential, unpredictable values automatically via database triggers.
 
 **Key Benefits:**
-- **No UUIDs needed**: Keep efficient integer IDs (stored as bigint) with configurable ID ranges per column
-- **Ash-native**: Declarative configuration using Ash resource DSL
+- **Secure IDs without UUIDs**: Hide sequential patterns while keeping efficient integer IDs (stored as bigint) with configurable ID ranges per column
 - **Automatic encryption**: Database triggers handle encryption transparently
 - **Collision-free**: Deterministic one-to-one mapping
 
@@ -30,12 +29,6 @@ You can customize the installation with the following options:
 * `--functions-prefix` or `-p`: Specify the PostgreSQL schema where the FeistelCipher functions will be created, defaults to `public`.
 * `--functions-salt` or `-s`: Specify the constant value used in the Feistel cipher algorithm. Changing this value will result in different cipher outputs for the same input, should be less than 2^31, defaults to `1_076_943_109`.
 
-Example with custom options:
-
-```bash
-mix igniter.install ash_feistel_cipher --functions-prefix myschema --functions-salt 123456789
-```
-
 ### Manual Installation
 
 If you need more control over the installation process, you can install manually:
@@ -45,7 +38,7 @@ If you need more control over the installation process, you can install manually
    ```elixir
    def deps do
      [
-       {:ash_feistel_cipher, "~> 0.11.0"}
+       {:ash_feistel_cipher, "~> 0.12.0"}
      ]
    end
    ```
