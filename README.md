@@ -25,12 +25,13 @@ mix igniter.install ash_feistel_cipher
 You can customize the installation with the following options:
 
 * `--repo` or `-r`: Specify an Ecto repo for FeistelCipher to use.
+* `--functions-prefix` or `-p`: Specify the PostgreSQL schema where the FeistelCipher functions will be created, defaults to `public`.
 * `--functions-salt` or `-s`: Specify the constant value used in the Feistel cipher algorithm. Changing this value will result in different cipher outputs for the same input, should be less than 2^31, defaults to `1_076_943_109`.
 
-Example with custom salt:
+Example with custom options:
 
 ```bash
-mix igniter.install ash_feistel_cipher --functions-salt 123456789
+mix igniter.install ash_feistel_cipher --functions-prefix myschema --functions-salt 123456789
 ```
 
 ### Manual Installation
@@ -181,7 +182,7 @@ integer_sequence :seq
 The base form for encrypted columns. Automatically sets `writable?: false`, `generated?: true`
 
 ```elixir
-encrypted_integer :id, from: :seq, primary_key?: true
+encrypted_integer :id, from: :seq, primary_key?: true, allow_nil?: false, public?: true
 encrypted_integer :referral_code, from: :seq
 ```
 
@@ -192,9 +193,6 @@ Convenience macro equivalent to `encrypted_integer` with `primary_key?: true`, `
 ```elixir
 encrypted_integer_primary_key :id, from: :seq
 encrypted_integer_primary_key :id, from: :seq, bits: 40
-
-# Equivalent to:
-# encrypted_integer :id, from: :seq, primary_key?: true, allow_nil?: false, public?: true
 ```
 
 ---
@@ -208,7 +206,7 @@ Optional:
 - `bits` (default: 52): Encryption bit size - determines ID range (40 bits = ~1T IDs, 52 bits = ~4.5Q IDs)
 - `key`: Custom encryption key (auto-generated from table/column names if not provided)
 - `rounds` (default: 16): Number of Feistel rounds (higher = more secure but slower)
-- `functions_prefix` (default: "public"): PostgreSQL schema where feistel functions are installed
+- `functions_prefix` (default: "public"): PostgreSQL schema where feistel functions are installed (set via `--functions-prefix` during installation)
 
 **Important**: 
 - `allow_nil?` on target must match source attribute's nullability
@@ -220,7 +218,7 @@ Optional:
 
 ### Requirements
 - **PostgreSQL only**: This extension requires `AshPostgres` data layer and PostgreSQL database
-- **FeistelCipher functions**: Database functions must be installed via `feistel_cipher` (automatic with igniter install)
+- **FeistelCipher functions**: Database functions must be installed via `mix feistel_cipher.install` (automatic with igniter install)
 
 ### Configuration Constraints
 ⚠️ **Cannot be changed after records are created:**
