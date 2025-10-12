@@ -60,7 +60,7 @@ defmodule AshFeistelCipher.TransformerTest do
       assert referral_statement.up =~ ":seq"
       assert referral_statement.up =~ ":referral_code"
       assert referral_statement.up =~ "bits: 40"
-      assert referral_statement.up =~ "key: 12345"
+      assert referral_statement.up =~ "key: 12_345"
     end
   end
 
@@ -82,7 +82,7 @@ defmodule AshFeistelCipher.TransformerTest do
       assert length(statements) == 1
       [statement] = statements
 
-      assert statement.up =~ "key: 999888777"
+      assert statement.up =~ "key: 999_888_777"
     end
 
     test "applies custom rounds configuration" do
@@ -187,8 +187,8 @@ defmodule AshFeistelCipher.TransformerTest do
 
       [statement] = statements
 
-      # Should use the custom key 999888777
-      assert statement.up =~ "key: 999888777"
+      # Should use the custom key with underscores
+      assert statement.up =~ "key: 999_888_777"
     end
   end
 
@@ -233,8 +233,8 @@ defmodule AshFeistelCipher.TransformerTest do
       assert statement.up =~ "bits: 40"
       refute statement.up =~ "bits: 52"
 
-      # Verify custom key (12345)
-      assert statement.up =~ "key: 12345"
+      # Verify custom key with underscores
+      assert statement.up =~ "key: 12_345"
 
       # Verify custom rounds (8)
       assert statement.up =~ "rounds: 8"
