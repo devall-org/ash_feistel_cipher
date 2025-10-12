@@ -1,6 +1,6 @@
 # AshFeistelCipher
 
-Encrypted integer IDs for Ash resources - UUID alternative using Feistel cipher
+Encrypted integer IDs for Ash resources using Feistel cipher
 
 > **Database Support**: PostgreSQL only (requires AshPostgres data layer and PostgreSQL database)
 
@@ -38,7 +38,7 @@ If you need more control over the installation process, you can install manually
    ```elixir
    def deps do
      [
-       {:ash_feistel_cipher, "~> 0.12.0"}
+       {:ash_feistel_cipher, "~> 0.12.1"}
      ]
    end
    ```
