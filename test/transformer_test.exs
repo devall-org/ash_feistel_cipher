@@ -172,10 +172,14 @@ defmodule AshFeistelCipher.TransformerTest do
 
       [statement] = statements
 
-      # The key should be generated when not provided
-      # The function call should have FeistelCipher.generate_key(...)
-      assert statement.up =~ "key: FeistelCipher.generate_key("
-      assert statement.up =~ "\"public\", \"valid_resources\", :seq, :id"
+      # The key should be generated at compile time and be a numeric value
+      # Extract key from the statement
+      assert [_, key_str] = Regex.run(~r/key: (\d+)/, statement.up)
+      key = String.to_integer(key_str)
+
+      # Key should be a positive integer less than 2^31
+      assert key > 0
+      assert key < :math.pow(2, 31)
     end
 
     test "preserves custom key when provided" do
