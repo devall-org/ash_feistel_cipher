@@ -76,12 +76,17 @@ Add `AshFeistelCipher` extension to your Ash resource and use the declarative DS
 ```elixir
 defmodule MyApp.Post do
   use Ash.Resource,
-    data_layer: Ash.DataLayer.Postgres,
+    data_layer: AshPostgres.DataLayer,
     extensions: [AshFeistelCipher]
+
+  postgres do
+    table "posts"
+    repo MyApp.Repo
+  end
 
   attributes do
     integer_sequence :seq
-    encrypted_integer_primary_key :id, from: :seq  # Convenience shorthand!
+    encrypted_integer_primary_key :id, from: :seq
     
     attribute :title, :string, allow_nil?: false
     timestamps()
@@ -96,41 +101,71 @@ mix ash.codegen create_post
 
 This creates a migration with database triggers that automatically encrypt `seq` into `id`.
 
+**Generated Migration Example:**
+```elixir
+defmodule MyApp.Repo.Migrations.CreatePost do
+  use Ecto.Migration
+
+  def up do
+    create table(:posts) do
+      add :seq, :bigserial, null: false
+      add :id, :bigint, null: false, primary_key: true
+      add :title, :string, null: false
+      timestamps()
+    end
+
+    # Automatically generates trigger for seq -> id encryption
+    execute(
+      FeistelCipher.up_for_trigger("public", "posts", "seq", "id",
+        bits: 52,
+        key: 1_984_253_769,
+        rounds: 16,
+        functions_prefix: "public"
+      )
+    )
+  end
+
+  def down do
+    execute(FeistelCipher.down_for_trigger("public", "posts", "seq", "id"))
+    drop table(:posts)
+  end
+end
+```
+
+**How it works:**
+When you create a record, the database trigger automatically encrypts the sequential `seq` value:
+
+```elixir
+# Create a post - only provide title, seq and id are auto-generated
+post = MyApp.Post.create!(%{title: "Hello World"})
+# => %MyApp.Post{seq: 1, id: 3_141_592_653, title: "Hello World"}
+
+# The encrypted id is deterministic and collision-free
+post2 = MyApp.Post.create!(%{title: "Second Post"})
+# => %MyApp.Post{seq: 2, id: 2_718_281_828, title: "Second Post"}
+
+# You can query by the encrypted id
+MyApp.Post.get!(3_141_592_653)
+# => %MyApp.Post{seq: 1, id: 3_141_592_653, title: "Hello World"}
+```
+
 ### Advanced Examples
 
-**Multiple encrypted fields from same source:**
+**Custom ID range with `bits`:**
 ```elixir
 attributes do
   integer_sequence :seq
-  encrypted_integer_primary_key :id, from: :seq
-  encrypted_integer :referral_code, from: :seq, key: 12345  # Different key for referral codes
-end
-```
-
-**Custom encryption parameters:**
-```elixir
-attributes do
-  integer_sequence :seq
-  encrypted_integer :id, 
+  encrypted_integer_primary_key :id, 
     from: :seq,
-    bits: 40,     # Encryption bit size - determines ID range (default: 52)
-    rounds: 8     # Feistel rounds (default: 16)
+    bits: 40  # ~1 trillion IDs (default: 52 = ~4.5 quadrillion)
 end
 ```
 
-**Using any integer attribute as source:**
+**Using any integer attribute as source (e.g. optional postal code):**
 ```elixir
 attributes do
-  attribute :custom_number, :integer
-  encrypted_integer :encrypted_number, from: :custom_number
-end
-```
-
-**Nullable columns:**
-```elixir
-attributes do
-  integer_sequence :optional_seq, allow_nil?: true
-  encrypted_integer :optional_id, from: :optional_seq, allow_nil?: true
+  attribute :postal_code, :integer, allow_nil?: true
+  encrypted_integer :encrypted_postal_code, from: :postal_code, allow_nil?: true
 end
 ```
 
@@ -138,51 +173,75 @@ end
 
 **`integer_sequence`**: Auto-incrementing bigserial column
 ```elixir
-integer_sequence :seq                        # Non-nullable
-integer_sequence :optional_seq, allow_nil?: true  # Nullable
+integer_sequence :seq
 ```
 
-**`encrypted_integer_primary_key`**: Encrypted integer primary key with automatic trigger (convenience shorthand)
+**`encrypted_integer`**: Encrypted integer column
 
-This is a convenience macro that automatically sets:
-- `primary_key?: true`
-- `allow_nil?: false`
-- `public?: true`
-- `writable?: false`
-- `generated?: true`
+The base form for encrypted columns. Automatically sets `writable?: false`, `generated?: true`
 
-Required options:
-- `from`: Source attribute name
+```elixir
+encrypted_integer :id, from: :seq, primary_key?: true
+encrypted_integer :referral_code, from: :seq
+```
 
-Optional parameters:
-- `bits` (default: 52): Encryption bit size - determines ID range (40 bits = ~1T IDs, 52 bits = ~4.5Q IDs)
-- `key`: Custom encryption key for different outputs from same source
-- `rounds` (default: 16): Number of Feistel rounds (more = more secure)
-- `functions_prefix` (default: "public"): PostgreSQL schema where feistel functions are installed
+**`encrypted_integer_primary_key`**: Shorthand for encrypted primary keys
 
-Examples:
+Convenience macro equivalent to `encrypted_integer` with `primary_key?: true`, `allow_nil?: false`, `public?: true` pre-set.
+
 ```elixir
 encrypted_integer_primary_key :id, from: :seq
 encrypted_integer_primary_key :id, from: :seq, bits: 40
-encrypted_integer_primary_key :id, from: :seq, key: 12345, rounds: 8
+
+# Equivalent to:
+# encrypted_integer :id, from: :seq, primary_key?: true, allow_nil?: false, public?: true
 ```
 
-**`encrypted_integer`**: Encrypted integer column with automatic trigger
+---
 
-Required options:
-- `from`: Source attribute name
+**Common Options for Encrypted Columns:**
 
-Optional parameters:
+Required:
+- `from`: Source attribute name (can be any integer attribute)
+
+Optional:
 - `bits` (default: 52): Encryption bit size - determines ID range (40 bits = ~1T IDs, 52 bits = ~4.5Q IDs)
-- `key`: Custom encryption key for different outputs from same source
-- `rounds` (default: 16): Number of Feistel rounds (more = more secure)
+- `key`: Custom encryption key (auto-generated from table/column names if not provided)
+- `rounds` (default: 16): Number of Feistel rounds (higher = more secure but slower)
+- `functions_prefix` (default: "public"): PostgreSQL schema where feistel functions are installed
 
 **Important**: 
 - `allow_nil?` on target must match source attribute's nullability
-- The `from` option can reference any integer attribute, not just `integer_sequence`
 - For primary keys, prefer `encrypted_integer_primary_key` for cleaner syntax
 
-> **Note**: For detailed parameter explanations (bits, rounds, performance), see [feistel_cipher Trigger Options](https://github.com/devall-org/feistel_cipher#trigger-options).
+> **Note**: For advanced options and performance details, see [feistel_cipher documentation](https://github.com/devall-org/feistel_cipher).
+
+## Important Notes & Limitations
+
+### Requirements
+- **PostgreSQL only**: This extension requires `AshPostgres` data layer and PostgreSQL database
+- **FeistelCipher functions**: Database functions must be installed via `feistel_cipher` (automatic with igniter install)
+
+### Configuration Constraints
+⚠️ **Cannot be changed after records are created:**
+- `bits`: Changing this will make existing encrypted values invalid
+- `key`: Different keys produce different encrypted outputs
+- `rounds`: Affects encryption algorithm behavior
+- `functions_prefix`: Changing this will break the trigger (functions won't be found)
+
+## Troubleshooting
+
+### Migration Error: Function not found
+
+**Error:**
+```
+ERROR: function feistel_encrypt does not exist
+```
+
+**Solution:** Install FeistelCipher database functions:
+```bash
+mix feistel_cipher.install --repo MyApp.Repo
+```
 
 ## Related Projects
 
