@@ -2,6 +2,8 @@
 
 Encrypted integer IDs for Ash resources - UUID alternative using Feistel cipher
 
+> **Database Support**: PostgreSQL only (requires AshPostgres data layer and PostgreSQL database)
+
 ## Overview
 
 Sequential IDs (1, 2, 3...) leak business information. This library provides a declarative DSL to configure [Feistel cipher](https://github.com/devall-org/feistel_cipher) encryption in your Ash resources, transforming sequential integers into non-sequential, unpredictable values automatically via database triggers.
@@ -162,7 +164,7 @@ attributes do
 end
 ```
 
-**Using any integer attribute as source (e.g. optional postal code):**
+**Using any integer attribute with `from` (e.g. optional postal code):**
 ```elixir
 attributes do
   attribute :postal_code, :integer, allow_nil?: true
@@ -200,63 +202,17 @@ encrypted_integer_primary_key :id, from: :seq, bits: 40
 **Common Options for Encrypted Columns:**
 
 Required:
-- `from`: Source attribute name (can be any integer attribute)
+- `from`: Integer attribute to encrypt (can be any integer attribute)
 
-Optional:
+Optional (⚠️ **Cannot be changed after records are created**):
 - `bits` (default: 52): Encryption bit size - determines ID range (40 bits = ~1T IDs, 52 bits = ~4.5Q IDs)
 - `key`: Custom encryption key (auto-generated from table/column names if not provided)
 - `rounds` (default: 16): Number of Feistel rounds (higher = more secure but slower)
 - `functions_prefix` (default: "public"): PostgreSQL schema where feistel functions are installed (set via `--functions-prefix` during installation)
 
 **Important**: 
-- `allow_nil?` on target must match source attribute's nullability
+- `allow_nil?` on encrypted column must match `from` attribute's nullability
 - For primary keys, prefer `encrypted_integer_primary_key` for cleaner syntax
-
-> **Note**: For advanced options and performance details, see [feistel_cipher documentation](https://github.com/devall-org/feistel_cipher).
-
-## Important Notes & Limitations
-
-### Requirements
-- **PostgreSQL only**: This extension requires `AshPostgres` data layer and PostgreSQL database
-- **FeistelCipher functions**: Database functions must be installed via `mix feistel_cipher.install` (automatic with igniter install)
-
-### Configuration Constraints
-⚠️ **Cannot be changed after records are created:**
-- `bits`: Changing this will make existing encrypted values invalid
-- `key`: Different keys produce different encrypted outputs
-- `rounds`: Affects encryption algorithm behavior
-- `functions_prefix`: Changing this will break the trigger (functions won't be found)
-
-## Troubleshooting
-
-### Migration Error: Function not found
-
-**Error:**
-```
-ERROR: function feistel_encrypt does not exist
-```
-
-**Solution:** Install FeistelCipher database functions:
-```bash
-mix feistel_cipher.install --repo MyApp.Repo
-```
-
-## Related Projects
-
-### [feistel_cipher](https://github.com/devall-org/feistel_cipher)
-
-The underlying library that provides the core Feistel cipher implementation for Ecto. `ash_feistel_cipher` builds on top of `feistel_cipher` to provide Ash-native declarative configuration.
-
-**Use `feistel_cipher` directly if you're:**
-- Using plain Ecto without Ash Framework
-- Need manual control over migrations and triggers
-
-**Use `ash_feistel_cipher` if you're:**
-- Using Ash Framework
-- Want declarative DSL configuration in Ash resources
-- Prefer automatic migration generation via `mix ash.codegen`
-
-For technical details about the algorithm, security properties, and performance benchmarks, see the [`feistel_cipher` documentation](https://github.com/devall-org/feistel_cipher).
 
 ## License
 
