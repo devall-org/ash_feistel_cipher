@@ -36,7 +36,6 @@ defmodule AshFeistelCipher.VerifierHelpers do
     base_attr = %{
       name: name,
       type: :integer,
-      source: name,
       allow_nil?: allow_nil?
     }
 
