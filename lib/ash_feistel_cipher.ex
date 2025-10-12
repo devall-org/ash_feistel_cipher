@@ -57,7 +57,7 @@ defmodule AshFeistelCipher do
 
       {:ok,
        attribute_struct
-       |> Map.put(:__feistel_cipher_target__, true)
+       |> Map.put(:__feistel_encrypted__, true)
        |> Map.put(:__feistel_from__, from)
        |> Map.put(:__feistel_bits__, bits)
        |> Map.put(:__feistel_key__, key)

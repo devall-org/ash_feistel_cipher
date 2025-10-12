@@ -18,7 +18,7 @@ defmodule AshFeistelCipher.Transformer do
     dsl_state
     |> Transformer.get_entities([:attributes])
     |> Enum.filter(fn attr ->
-      Map.get(attr, :__feistel_cipher_target__, false)
+      Map.get(attr, :__feistel_encrypted__, false)
     end)
   end
 

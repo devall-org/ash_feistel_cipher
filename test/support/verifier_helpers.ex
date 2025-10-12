@@ -24,12 +24,12 @@ defmodule AshFeistelCipher.VerifierHelpers do
   Builds a mock attribute for testing.
 
   ## Options
-  - `:is_target` - Whether this is a feistel_encrypted (default: false)
+  - `:is_encrypted` - Whether this is an encrypted_integer attribute (default: false)
   - `:allow_nil?` - Whether the attribute allows nil (default: false)
-  - `:from` - Source attribute for feistel_encrypted (required if is_target is true)
+  - `:from` - Source attribute for encrypted_integer (required if is_encrypted is true)
   """
   def build_attribute(name, opts \\ []) do
-    is_target = Keyword.get(opts, :is_target, false)
+    is_encrypted = Keyword.get(opts, :is_encrypted, false)
     allow_nil? = Keyword.get(opts, :allow_nil?, false)
     from = Keyword.get(opts, :from)
 
@@ -40,9 +40,9 @@ defmodule AshFeistelCipher.VerifierHelpers do
       allow_nil?: allow_nil?
     }
 
-    if is_target do
+    if is_encrypted do
       base_attr
-      |> Map.put(:__feistel_cipher_target__, true)
+      |> Map.put(:__feistel_encrypted__, true)
       |> Map.put(:__feistel_from__, from)
     else
       base_attr
