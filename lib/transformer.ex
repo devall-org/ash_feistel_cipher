@@ -36,11 +36,19 @@ defmodule AshFeistelCipher.Transformer do
     table = dsl_state |> Transformer.get_option([:postgres], :table)
     prefix = dsl_state |> Transformer.get_option([:postgres], :schema) || "public"
 
+    # Generate key explicitly if not provided
+    key_expr =
+      if key do
+        inspect(key)
+      else
+        "FeistelCipher.generate_key(#{inspect(prefix)}, #{inspect(table)}, #{inspect(source)}, #{inspect(target)})"
+      end
+
     up = """
     execute(
       FeistelCipher.up_for_trigger(#{inspect(prefix)}, #{inspect(table)}, #{inspect(source)}, #{inspect(target)},
         bits: #{bits},
-        key: #{inspect(key)},
+        key: #{key_expr},
         rounds: #{rounds},
         functions_prefix: #{inspect(functions_prefix)}
       )
