@@ -13,7 +13,7 @@ defmodule AshFeistelCipher do
     name: :integer_sequence,
     describe: """
     Declares an auto-generated bigserial column.
-    This is a convenience utility - you can also use any regular integer attribute (including nullable ones with `allow_nil?: true`) as a source for Feistel cipher encryption.
+    This is a convenience utility - you can also use any regular integer attribute (including nullable ones with `allow_nil?: true`) with the `from` option for Feistel cipher encryption.
     """,
     examples: [
       "integer_sequence :seq",
