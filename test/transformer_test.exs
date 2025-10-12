@@ -172,9 +172,10 @@ defmodule AshFeistelCipher.TransformerTest do
 
       [statement] = statements
 
-      # The key should be nil when not provided (auto-generated)
-      # The function call should have key: nil
-      assert statement.up =~ "key: nil"
+      # The key should be generated when not provided
+      # The function call should have FeistelCipher.generate_key(...)
+      assert statement.up =~ "key: FeistelCipher.generate_key("
+      assert statement.up =~ "\"public\", \"valid_resources\", :seq, :id"
     end
 
     test "preserves custom key when provided" do
