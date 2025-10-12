@@ -4,13 +4,12 @@ defmodule AshFeistelCipher.MixProject do
   def project do
     [
       app: :ash_feistel_cipher,
-      version: "0.12.0",
+      version: "0.12.1",
       elixir: "~> 1.17",
       consolidate_protocols: Mix.env() not in [:dev, :test],
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      description:
-        "Ash extension that transforms integer attributes using a Feistel cipher via Postgres triggers.",
+      description: "Encrypted integer IDs for Ash resources using Feistel cipher",
       package: package(),
       source_url: "https://github.com/devall-org/ash_feistel_cipher",
       homepage_url: "https://github.com/devall-org/ash_feistel_cipher",
@@ -32,7 +31,7 @@ defmodule AshFeistelCipher.MixProject do
   defp deps do
     [
       {:igniter, "~> 0.6", optional: true},
-      {:feistel_cipher, "~> 0.12.0"},
+      {:feistel_cipher, "~> 0.12.1"},
       {:ash, "~> 3.0"},
       {:ash_postgres, "~> 2.0"},
       {:spark, "~> 2.0"},
