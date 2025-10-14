@@ -10,7 +10,7 @@ Sequential IDs (1, 2, 3...) leak business information. This library provides a d
 
 **Key Benefits:**
 - **Secure IDs without UUIDs**: Hide sequential patterns while keeping efficient integer IDs with adjustable bit size per column
-- **Deterministic encryption**: Same input always produces same ID (consistent seed data in dev/staging environments, unlike UUIDs/random integers)
+- **Deterministic encryption**: Same insertion order always produces same encrypted ID (consistent seed data in dev/staging environments, unlike UUIDs/random integers)
 - **Automatic encryption**: Database triggers handle encryption transparently
 - **Collision-free**: One-to-one mapping
 
