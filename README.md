@@ -197,7 +197,7 @@ encrypted_integer :referral_code, from: :seq
 
 **`encrypted_integer_primary_key`**: Shorthand for encrypted primary keys
 
-Convenience macro equivalent to `encrypted_integer` with `primary_key?: true`, `allow_nil?: false`, `public?: true` pre-set.
+Convenience helper equivalent to `encrypted_integer` with `primary_key?: true`, `allow_nil?: false`, `public?: true` pre-set.
 
 ```elixir
 encrypted_integer_primary_key :id, from: :seq
