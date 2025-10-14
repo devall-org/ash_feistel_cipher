@@ -9,9 +9,10 @@ Encrypted integer IDs for Ash resources using Feistel cipher
 Sequential IDs (1, 2, 3...) leak business information. This library provides a declarative DSL to configure [Feistel cipher](https://github.com/devall-org/feistel_cipher) encryption in your Ash resources, transforming sequential integers into non-sequential, unpredictable values automatically via database triggers.
 
 **Key Benefits:**
-- **Secure IDs without UUIDs**: Hide sequential patterns while keeping efficient integer IDs (stored as bigint) with configurable ID ranges per column
+- **Secure IDs without UUIDs**: Hide sequential patterns while keeping efficient integer IDs with adjustable bit size per column
+- **Deterministic encryption**: Same input always produces same ID (consistent seed data in dev/staging environments, unlike UUIDs/random integers)
 - **Automatic encryption**: Database triggers handle encryption transparently
-- **Collision-free**: Deterministic one-to-one mapping
+- **Collision-free**: One-to-one mapping
 
 > For detailed information about the Feistel cipher algorithm, how it works, security properties, and performance benchmarks, see the [feistel_cipher](https://github.com/devall-org/feistel_cipher) library documentation.
 
@@ -40,7 +41,7 @@ If you need more control over the installation process, you can install manually
    ```elixir
    def deps do
      [
-       {:ash_feistel_cipher, "~> 0.13.1"}
+       {:ash_feistel_cipher, "~> 0.13.4"}
      ]
    end
    ```
