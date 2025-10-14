@@ -4,7 +4,7 @@ defmodule AshFeistelCipher.MixProject do
   def project do
     [
       app: :ash_feistel_cipher,
-      version: "0.13.0",
+      version: "0.13.1",
       elixir: "~> 1.17",
       consolidate_protocols: Mix.env() not in [:dev, :test],
       start_permanent: Mix.env() == :prod,

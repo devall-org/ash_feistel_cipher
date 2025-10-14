@@ -40,7 +40,7 @@ If you need more control over the installation process, you can install manually
    ```elixir
    def deps do
      [
-       {:ash_feistel_cipher, "~> 0.13.0"}
+       {:ash_feistel_cipher, "~> 0.13.1"}
      ]
    end
    ```
@@ -155,6 +155,20 @@ attributes do
     from: :seq,
     bits: 40  # ~1 trillion IDs (default: 52 = ~4.5 quadrillion)
 end
+```
+
+**Multiple encrypted columns from same source:**
+```elixir
+attributes do
+  integer_sequence :seq
+  encrypted_integer_primary_key :id, from: :seq
+  encrypted_integer :referral_code, from: :seq, allow_nil?: false
+  
+  attribute :title, :string, allow_nil?: false
+end
+
+# Each column uses a different encryption key, generating unique values:
+# => %MyApp.Post{seq: 1, id: 3_141_592_653, referral_code: 8_237_401_928, title: "Hello"}
 ```
 
 **Using any integer attribute with `from` (e.g. optional postal code):**
