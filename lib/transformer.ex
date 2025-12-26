@@ -9,26 +9,27 @@ defmodule AshFeistelCipher.Transformer do
   @impl Spark.Dsl.Transformer
   def transform(dsl_state) do
     dsl_state
-    |> get_feistel_encrypted_attributes()
+    |> get_feistel_cipher_attributes()
     |> Enum.reduce(dsl_state, &add_feistel_cipher_trigger(&1, &2))
     |> then(fn dsl_state -> {:ok, dsl_state} end)
   end
 
-  defp get_feistel_encrypted_attributes(dsl_state) do
+  defp get_feistel_cipher_attributes(dsl_state) do
     dsl_state
     |> Transformer.get_entities([:attributes])
     |> Enum.filter(fn attr ->
-      Map.get(attr, :__feistel_encrypted__, false)
+      Map.has_key?(attr, :__feistel_cipher__)
     end)
   end
 
   defp add_feistel_cipher_trigger(attribute, dsl_state) do
-    from_attr = Map.get(attribute, :__feistel_from__)
+    opts = Map.get(attribute, :__feistel_cipher__)
+    from_attr = opts.from
     to_attr = attribute.name
-    bits = Map.get(attribute, :__feistel_bits__)
-    key = Map.get(attribute, :__feistel_key__)
-    rounds = Map.get(attribute, :__feistel_rounds__)
-    functions_prefix = Map.get(attribute, :__feistel_functions_prefix__)
+    bits = opts.bits
+    key = opts.key
+    rounds = opts.rounds
+    functions_prefix = opts.functions_prefix
 
     from_column = get_db_column_name(from_attr, dsl_state)
     to_column = get_db_column_name(to_attr, dsl_state)
