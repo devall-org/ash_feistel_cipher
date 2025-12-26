@@ -1,5 +1,5 @@
 defmodule AshFeistelCipher do
-  defmodule FeistelEncrypted do
+  defmodule EncryptedIntegerAttribute do
     @moduledoc false
     # Feistel-specific fields
     @feistel_fields [:from, :bits, :key, :rounds, :functions_prefix]
@@ -35,17 +35,17 @@ defmodule AshFeistelCipher do
     entity: @integer_sequence
   }
 
-  def mark_as_feistel_encrypted(%FeistelEncrypted{} = feistel_attr) do
+  def transform(%EncryptedIntegerAttribute{} = entity) do
     # Extract feistel-specific options
-    from = feistel_attr.from
-    bits = feistel_attr.bits
-    key = feistel_attr.key
-    rounds = feistel_attr.rounds
-    functions_prefix = feistel_attr.functions_prefix
+    from = entity.from
+    bits = entity.bits
+    key = entity.key
+    rounds = entity.rounds
+    functions_prefix = entity.functions_prefix
 
-    # Convert FeistelEncrypted struct to a map with Ash.Resource.Attribute fields
+    # Convert EncryptedIntegerAttribute struct to a map with Ash.Resource.Attribute fields
     ash_attr_map =
-      feistel_attr
+      entity
       |> Map.from_struct()
       |> Map.drop([:from, :bits, :key, :rounds, :functions_prefix])
       |> Map.update(:constraints, [], fn val -> val || [] end)
@@ -57,12 +57,13 @@ defmodule AshFeistelCipher do
 
       {:ok,
        attribute_struct
-       |> Map.put(:__feistel_encrypted__, true)
-       |> Map.put(:__feistel_from__, from)
-       |> Map.put(:__feistel_bits__, bits)
-       |> Map.put(:__feistel_key__, key)
-       |> Map.put(:__feistel_rounds__, rounds)
-       |> Map.put(:__feistel_functions_prefix__, functions_prefix)}
+       |> Map.put(:__feistel_cipher__, %{
+         from: from,
+         bits: bits,
+         key: key,
+         rounds: rounds,
+         functions_prefix: functions_prefix
+       })}
     end
   end
 
@@ -114,14 +115,14 @@ defmodule AshFeistelCipher do
       "encrypted_integer :id, from: :seq, bits: 40, functions_prefix: \"accounts\""
     ],
     args: [:name],
-    target: AshFeistelCipher.FeistelEncrypted,
+    target: AshFeistelCipher.EncryptedIntegerAttribute,
     schema:
       @feistel_options ++
         (Ash.Resource.Attribute.attribute_schema()
          |> Spark.Options.Helpers.set_default!(:type, :integer)
          |> Spark.Options.Helpers.set_default!(:writable?, false)
          |> Spark.Options.Helpers.set_default!(:generated?, true)),
-    transform: {__MODULE__, :mark_as_feistel_encrypted, []}
+    transform: {__MODULE__, :transform, []}
   }
 
   @encrypted_integer_patch %Spark.Dsl.Patch.AddEntity{
@@ -142,7 +143,7 @@ defmodule AshFeistelCipher do
       "encrypted_integer_primary_key :id, from: :seq, key: 12345, rounds: 8"
     ],
     args: [:name],
-    target: AshFeistelCipher.FeistelEncrypted,
+    target: AshFeistelCipher.EncryptedIntegerAttribute,
     schema:
       @feistel_options ++
         (Ash.Resource.Attribute.attribute_schema()
@@ -152,7 +153,7 @@ defmodule AshFeistelCipher do
          |> Spark.Options.Helpers.set_default!(:primary_key?, true)
          |> Spark.Options.Helpers.set_default!(:allow_nil?, false)
          |> Spark.Options.Helpers.set_default!(:public?, true)),
-    transform: {__MODULE__, :mark_as_feistel_encrypted, []}
+    transform: {__MODULE__, :transform, []}
   }
 
   @encrypted_integer_primary_key_patch %Spark.Dsl.Patch.AddEntity{

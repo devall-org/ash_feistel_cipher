@@ -41,8 +41,7 @@ defmodule AshFeistelCipher.VerifierHelpers do
 
     if is_encrypted do
       base_attr
-      |> Map.put(:__feistel_encrypted__, true)
-      |> Map.put(:__feistel_from__, from)
+      |> Map.put(:__feistel_cipher__, %{from: from})
     else
       base_attr
     end
