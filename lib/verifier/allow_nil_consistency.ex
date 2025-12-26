@@ -20,14 +20,14 @@ defmodule AshFeistelCipher.Verifier.AllowNilConsistency do
     encrypted_attrs =
       attributes
       |> Enum.filter(fn attr ->
-        Map.get(attr, :__feistel_encrypted__, false)
+        Map.has_key?(attr, :__feistel_cipher__)
       end)
 
     # Check each encrypted_integer attribute
     inconsistent =
       Enum.filter(encrypted_attrs, fn encrypted_attr ->
-        from_name = Map.get(encrypted_attr, :__feistel_from__)
-        from_allow_nil = Map.get(attr_map, from_name, false)
+        opts = Map.get(encrypted_attr, :__feistel_cipher__)
+        from_allow_nil = Map.get(attr_map, opts.from, false)
         encrypted_allow_nil = Map.get(encrypted_attr, :allow_nil?, false)
 
         # If from attribute allows nil, encrypted attribute should also allow nil
@@ -41,10 +41,12 @@ defmodule AshFeistelCipher.Verifier.AllowNilConsistency do
       attrs_with_issues ->
         error_details =
           Enum.map_join(attrs_with_issues, "\n", fn attr ->
-            from_name = Map.get(attr, :__feistel_from__)
+            opts = Map.get(attr, :__feistel_cipher__)
 
-            "  - from: #{inspect(from_name)} (allow_nil?: true), encrypted: #{inspect(attr.name)} (allow_nil?: false)"
+            "  - from: #{inspect(opts.from)} (allow_nil?: true), encrypted: #{inspect(attr.name)} (allow_nil?: false)"
           end)
+
+        first_opts = Map.get(List.first(attrs_with_issues), :__feistel_cipher__)
 
         {:error,
          Spark.Error.DslError.exception(
@@ -56,7 +58,7 @@ defmodule AshFeistelCipher.Verifier.AllowNilConsistency do
 
            Please update the encrypted attribute(s) to include `allow_nil?: true`:
 
-               encrypted_integer :#{List.first(attrs_with_issues).name}, from: :#{Map.get(List.first(attrs_with_issues), :__feistel_from__)}, allow_nil?: true
+               encrypted_integer :#{List.first(attrs_with_issues).name}, from: :#{first_opts.from}, allow_nil?: true
            """,
            path: [:attributes]
          )}
