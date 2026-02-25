@@ -10,13 +10,19 @@
 
 ### Steps
 
-1. **Update source code** — run the upgrade task to update your Ash resource DSL:
+1. **Update source code** — replace `bits:` with `time_bits: 0, data_bits:` in your Ash resources:
 
-```bash
-mix ash_feistel_cipher.upgrade
+```elixir
+# Before (v0.x)
+encrypted_integer_primary_key :id, from: :seq, bits: 52
+
+# After (v1.0)
+encrypted_integer_primary_key :id, from: :seq, time_bits: 0, data_bits: 52
 ```
 
-This transforms `bits: N` → `time_bits: 0, data_bits: N` in your resource files. Setting `time_bits: 0` ensures backward compatibility with existing encrypted data.
+If `bits` was not specified (default was 52), add `time_bits: 0, data_bits: 52` explicitly.
+
+> **Note**: The project won't compile until all `bits:` usages are replaced, because `bits:` is no longer a valid option in v1.0.
 
 2. **Upgrade database** — see [feistel_cipher UPGRADE.md](https://github.com/devall-org/feistel_cipher/blob/main/UPGRADE.md) for the database migration guide.
 
