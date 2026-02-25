@@ -66,38 +66,9 @@ If you need more control over the installation process, you can install manually
    ]
    ```
 
-## Upgrading from v0.x to v1.0
+## Upgrading from v0.x
 
-### 1. Update source code
-
-Run the upgrade task to update your Ash resource DSL:
-
-```bash
-mix ash_feistel_cipher.upgrade
-```
-
-This transforms `bits: N` → `data_bits: N, time_bits: 0` in your resource files.
-
-### 2. Update database
-
-Run the feistel_cipher upgrade task:
-
-```bash
-mix feistel_cipher.upgrade
-```
-
-Edit the generated migration — see [feistel_cipher upgrade guide](https://github.com/devall-org/feistel_cipher#upgrading-from-v0x-to-v10) for details.
-
-### 3. Regenerate migrations
-
-```bash
-mix ash.codegen upgrade_feistel_cipher
-```
-
-**Key changes**:
-- `bits: N` → `data_bits: N` (default changed from 52 to 40)
-- New options: `time_bits` (default: 12), `time_bucket`, `encrypt_time`
-- Use `time_bits: 0` for backward compatibility with existing data
+See [UPGRADE.md](UPGRADE.md) for the migration guide.
 
 ## Usage
 
