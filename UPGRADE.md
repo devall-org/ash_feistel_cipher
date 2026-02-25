@@ -1,6 +1,6 @@
 # Upgrading AshFeistelCipher
 
-## From v0.15.0 to v1.0.0
+## From v0.14.0 or v0.15.0 to v1.0.0
 
 ### What changed
 
@@ -28,8 +28,8 @@ mix ash.codegen upgrade_feistel_cipher
 
 ---
 
-## From v0.14.0 or earlier to v1.0.0
+## From v0.13.x or earlier to v1.0.0
 
-The `feistel_cipher` dependency changed its cipher algorithm in v0.15.0 (HMAC-SHA256 hardening), so encryption results are different from v0.14.0 and earlier. See [feistel_cipher UPGRADE.md](https://github.com/devall-org/feistel_cipher/blob/main/UPGRADE.md#from-v0140-or-earlier-to-v100) for details on compatibility.
+The `feistel_cipher` dependency changed its cipher algorithm in v0.14.0 (HMAC-SHA256 hardening), so encryption results are different from v0.13.x and earlier. See [feistel_cipher UPGRADE.md](https://github.com/devall-org/feistel_cipher/blob/main/UPGRADE.md#from-v013x-or-earlier-to-v100) for details on compatibility.
 
 The DSL upgrade steps are the same as above.
