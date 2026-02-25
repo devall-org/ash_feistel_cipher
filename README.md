@@ -41,7 +41,7 @@ If you need more control over the installation process, you can install manually
    ```elixir
    def deps do
      [
-       {:ash_feistel_cipher, "~> 0.15.0"}
+       {:ash_feistel_cipher, "~> 1.0"}
      ]
    end
    ```
@@ -65,6 +65,10 @@ If you need more control over the installation process, you can install manually
      import_deps: [:ash_feistel_cipher]
    ]
    ```
+
+## Upgrading from v0.x
+
+See [UPGRADE.md](UPGRADE.md) for the migration guide.
 
 ## Usage
 
@@ -114,7 +118,10 @@ defmodule MyApp.Repo.Migrations.CreatePost do
     # Automatically generates trigger for seq -> id encryption
     execute(
       FeistelCipher.up_for_trigger("public", "posts", "seq", "id",
-        bits: 52,
+        time_bits: 12,
+        time_bucket: 86400,
+        encrypt_time: false,
+        data_bits: 40,
         key: 1_984_253_769,
         rounds: 16,
         functions_prefix: "public"
@@ -148,13 +155,21 @@ MyApp.Post.get!(3_141_592_653)
 
 ### Advanced Examples
 
-**Custom ID range with `bits`:**
+**Custom ID range with `data_bits`:**
 ```elixir
 attributes do
   integer_sequence :seq
-  encrypted_integer_primary_key :id, 
+  encrypted_integer_primary_key :id,
     from: :seq,
-    bits: 40  # ~1 trillion IDs (default: 52 = ~4.5 quadrillion)
+    data_bits: 32  # ~4 billion IDs (default: 40 = ~1 trillion)
+end
+```
+
+**Disable time prefix (backward compatible with v0.x):**
+```elixir
+attributes do
+  integer_sequence :seq
+  encrypted_integer_primary_key :id, from: :seq, time_bits: 0, data_bits: 52
 end
 ```
 
@@ -202,7 +217,7 @@ Convenience helper equivalent to `encrypted_integer` with `primary_key?: true`, 
 
 ```elixir
 encrypted_integer_primary_key :id, from: :seq
-encrypted_integer_primary_key :id, from: :seq, bits: 40
+encrypted_integer_primary_key :id, from: :seq, data_bits: 32
 ```
 
 ---
@@ -213,10 +228,13 @@ Required:
 - `from`: Integer attribute to encrypt (can be any integer attribute)
 
 Optional (⚠️ **Cannot be changed after records are created**):
-- `bits` (default: 52): Encryption bit size - determines ID range (40 bits = ~1T IDs, 52 bits = ~4.5Q IDs)
+- `time_bits` (default: 12): Time prefix bits for backup optimization. Set to 0 for no time prefix
+- `time_bucket` (default: 86400): Time bucket size in seconds
+- `encrypt_time` (default: false): Whether to encrypt the time prefix
+- `data_bits` (default: 40): Data encryption bit size (must be even)
 - `key`: Custom encryption key (auto-generated from table/column names if not provided)
 - `rounds` (default: 16): Number of Feistel rounds (higher = more secure but slower)
-- `functions_prefix` (default: "public"): PostgreSQL schema where feistel functions are installed (set via `--functions-prefix` during installation)
+- `functions_prefix` (default: "public"): PostgreSQL schema where feistel functions are installed
 
 **Important**: 
 - `allow_nil?` on encrypted column must match `from` attribute's nullability
