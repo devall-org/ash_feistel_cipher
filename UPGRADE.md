@@ -24,7 +24,13 @@ If `bits` was not specified (default was 52), add `time_bits: 0, data_bits: 52` 
 
 > **Note**: The project won't compile until all `bits:` usages are replaced, because `bits:` is no longer a valid option in v1.0.
 
-2. **Upgrade database** — see [feistel_cipher UPGRADE.md](https://github.com/devall-org/feistel_cipher/blob/main/UPGRADE.md) for the database migration guide.
+2. **Upgrade database** — generate the migration for upgrading PostgreSQL functions:
+
+```bash
+mix ash_feistel_cipher.upgrade
+```
+
+This composes `feistel_cipher.upgrade` to generate an Ecto migration template. Edit the generated migration to fill in your `functions_salt` and trigger details. See [feistel_cipher UPGRADE.md](https://github.com/devall-org/feistel_cipher/blob/main/UPGRADE.md) for details.
 
 3. **Regenerate Ash migrations**:
 
