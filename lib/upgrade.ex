@@ -2,7 +2,7 @@ defmodule Mix.Tasks.AshFeistelCipher.Upgrade.Docs do
   @moduledoc false
 
   def short_doc do
-    "Upgrade AshFeistelCipher DSL from v0.x to v1.0"
+    "Generate a migration to upgrade FeistelCipher from v0.x to v1.0"
   end
 
   def example do
@@ -13,11 +13,11 @@ defmodule Mix.Tasks.AshFeistelCipher.Upgrade.Docs do
     """
     #{short_doc()}
 
-    Updates Ash resource source files to use the v1.0 DSL:
-    - Renames `bits: N` to `time_bits: 0, data_bits: N`
-    - If no `bits` was specified, adds `time_bits: 0, data_bits: 52` (making old defaults explicit)
+    Generates an Ecto migration that upgrades the PostgreSQL functions from v0.x to v1.0.
+    This composes `feistel_cipher.upgrade` with the same options.
 
-    Setting `time_bits: 0` ensures backward compatibility with existing encrypted data.
+    **Note**: Before running this task, you must manually update your Ash resource DSL
+    to replace `bits:` with `time_bits: 0, data_bits:`. See UPGRADE.md for details.
 
     ## Example
 
@@ -25,17 +25,19 @@ defmodule Mix.Tasks.AshFeistelCipher.Upgrade.Docs do
     #{example()}
     ```
 
-    After running this task, also run `mix feistel_cipher.upgrade` to generate
-    the database migration for upgrading the PostgreSQL functions.
+    ## Options
+
+    * `--repo` or `-r` — Specify an Ecto repo for FeistelCipher to use.
+    * `--functions-prefix` or `-p` — Specify the PostgreSQL schema prefix (default: `public`)
     """
   end
 end
 
 if Code.ensure_loaded?(Igniter) do
   defmodule Mix.Tasks.AshFeistelCipher.Upgrade do
-    @shortdoc "#{__MODULE__.Docs.short_doc()}"
-
+    @shortdoc __MODULE__.Docs.short_doc()
     @moduledoc __MODULE__.Docs.long_doc()
+
     use Igniter.Mix.Task
 
     @impl Igniter.Mix.Task
@@ -47,82 +49,29 @@ if Code.ensure_loaded?(Igniter) do
         example: __MODULE__.Docs.example(),
         only: nil,
         positional: [],
-        composes: [],
-        schema: [],
-        defaults: [],
-        aliases: [],
+        composes: ["feistel_cipher.upgrade"],
+        schema: [repo: :string, functions_prefix: :string],
+        defaults: [functions_prefix: "public"],
+        aliases: [r: :repo, p: :functions_prefix],
         required: []
       }
     end
 
     @impl Igniter.Mix.Task
     def igniter(igniter) do
+      opts = igniter.args.options
+
+      feistel_cipher_argv =
+        []
+        |> maybe_add_option("--repo", opts[:repo])
+        |> maybe_add_option("--functions-prefix", opts[:functions_prefix])
+
       igniter
-      |> upgrade_dsl_calls(:encrypted_integer)
-      |> upgrade_dsl_calls(:encrypted_integer_primary_key)
+      |> Igniter.compose_task("feistel_cipher.upgrade", feistel_cipher_argv)
     end
 
-    defp upgrade_dsl_calls(igniter, entity_name) do
-      # Find all Elixir source files and transform bits: -> time_bits: 0 + data_bits:
-      igniter
-      |> Igniter.Project.Module.find_all_matching_modules(fn _module, zipper ->
-        source = Sourceror.Zipper.root(zipper) |> Sourceror.to_string()
-        String.contains?(source, to_string(entity_name))
-      end)
-      |> case do
-        {igniter, []} ->
-          igniter
-
-        {igniter, modules} ->
-          Enum.reduce(modules, igniter, fn {module_name, _}, igniter ->
-            Igniter.Project.Module.find_and_update_module!(igniter, module_name, fn zipper ->
-              transform_bits_to_data_bits(zipper, entity_name)
-            end)
-          end)
-      end
-    end
-
-    defp transform_bits_to_data_bits(zipper, entity_name) do
-      # Walk the AST to find entity_name calls with bits: option
-      case find_entity_with_bits(zipper, entity_name) do
-        nil ->
-          {:ok, zipper}
-
-        zipper ->
-          zipper = replace_bits_with_data_bits(zipper)
-          # Continue searching for more occurrences
-          transform_bits_to_data_bits(zipper, entity_name)
-      end
-    end
-
-    defp find_entity_with_bits(zipper, entity_name) do
-      Igniter.Code.Common.move_to(zipper, fn node ->
-        case node do
-          {^entity_name, _, args} when is_list(args) ->
-            args_str = Sourceror.to_string(node)
-            String.contains?(args_str, "bits:")
-
-          _ ->
-            false
-        end
-      end)
-      |> case do
-        {:ok, zipper} -> zipper
-        _ -> nil
-      end
-    end
-
-    defp replace_bits_with_data_bits(zipper) do
-      node = Sourceror.Zipper.node(zipper)
-      source = Sourceror.to_string(node)
-
-      # Replace bits: N with time_bits: 0, data_bits: N
-      updated_source =
-        Regex.replace(~r/\bbits:\s*(\d+)/, source, "time_bits: 0, data_bits: \\1")
-
-      {:ok, updated_node} = Sourceror.parse_string(updated_source)
-      Sourceror.Zipper.replace(zipper, updated_node)
-    end
+    defp maybe_add_option(argv, _flag, nil), do: argv
+    defp maybe_add_option(argv, flag, value), do: argv ++ [flag, to_string(value)]
   end
 else
   defmodule Mix.Tasks.AshFeistelCipher.Upgrade do
