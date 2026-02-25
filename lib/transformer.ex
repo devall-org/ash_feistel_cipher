@@ -55,10 +55,10 @@ defmodule AshFeistelCipher.Transformer do
     up = """
     execute(
       FeistelCipher.up_for_trigger(#{inspect(prefix)}, #{inspect(table)}, #{inspect(from_column)}, #{inspect(to_column)},
-        data_bits: #{data_bits},
         time_bits: #{time_bits},
         time_bucket: #{time_bucket},
         encrypt_time: #{encrypt_time},
+        data_bits: #{data_bits},
         key: #{key_formatted},
         rounds: #{rounds},
         functions_prefix: #{inspect(functions_prefix)}

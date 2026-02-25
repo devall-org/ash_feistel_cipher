@@ -16,7 +16,7 @@
 mix ash_feistel_cipher.upgrade
 ```
 
-This transforms `bits: N` → `data_bits: N, time_bits: 0` in your resource files. Setting `time_bits: 0` ensures backward compatibility with existing encrypted data.
+This transforms `bits: N` → `time_bits: 0, data_bits: N` in your resource files. Setting `time_bits: 0` ensures backward compatibility with existing encrypted data.
 
 2. **Upgrade database** — see [feistel_cipher UPGRADE.md](https://github.com/devall-org/feistel_cipher/blob/main/UPGRADE.md) for the database migration guide.
 

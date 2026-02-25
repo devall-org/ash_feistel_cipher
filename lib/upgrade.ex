@@ -14,8 +14,8 @@ defmodule Mix.Tasks.AshFeistelCipher.Upgrade.Docs do
     #{short_doc()}
 
     Updates Ash resource source files to use the v1.0 DSL:
-    - Renames `bits: N` to `data_bits: N, time_bits: 0`
-    - If no `bits` was specified, adds `data_bits: 52, time_bits: 0` (making old defaults explicit)
+    - Renames `bits: N` to `time_bits: 0, data_bits: N`
+    - If no `bits` was specified, adds `time_bits: 0, data_bits: 52` (making old defaults explicit)
 
     Setting `time_bits: 0` ensures backward compatibility with existing encrypted data.
 
@@ -63,7 +63,7 @@ if Code.ensure_loaded?(Igniter) do
     end
 
     defp upgrade_dsl_calls(igniter, entity_name) do
-      # Find all Elixir source files and transform bits: -> data_bits: + time_bits: 0
+      # Find all Elixir source files and transform bits: -> time_bits: 0 + data_bits:
       igniter
       |> Igniter.Project.Module.find_all_matching_modules(fn _module, zipper ->
         source = Sourceror.Zipper.root(zipper) |> Sourceror.to_string()
@@ -116,9 +116,9 @@ if Code.ensure_loaded?(Igniter) do
       node = Sourceror.Zipper.node(zipper)
       source = Sourceror.to_string(node)
 
-      # Replace bits: N with data_bits: N, time_bits: 0
+      # Replace bits: N with time_bits: 0, data_bits: N
       updated_source =
-        Regex.replace(~r/\bbits:\s*(\d+)/, source, "data_bits: \\1, time_bits: 0")
+        Regex.replace(~r/\bbits:\s*(\d+)/, source, "time_bits: 0, data_bits: \\1")
 
       {:ok, updated_node} = Sourceror.parse_string(updated_source)
       Sourceror.Zipper.replace(zipper, updated_node)

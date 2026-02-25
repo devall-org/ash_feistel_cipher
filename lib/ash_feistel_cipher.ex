@@ -2,7 +2,7 @@ defmodule AshFeistelCipher do
   defmodule EncryptedIntegerAttribute do
     @moduledoc false
     # Feistel-specific fields
-    @feistel_fields [:from, :data_bits, :time_bits, :time_bucket, :encrypt_time, :key, :rounds, :functions_prefix]
+    @feistel_fields [:from, :time_bits, :time_bucket, :encrypt_time, :data_bits, :key, :rounds, :functions_prefix]
     # Ash.Resource.Attribute fields
     @ash_fields Ash.Resource.Attribute.attribute_schema() |> Keyword.keys()
 
@@ -50,7 +50,7 @@ defmodule AshFeistelCipher do
     ash_attr_map =
       entity
       |> Map.from_struct()
-      |> Map.drop([:from, :data_bits, :time_bits, :time_bucket, :encrypt_time, :key, :rounds, :functions_prefix])
+      |> Map.drop([:from, :time_bits, :time_bucket, :encrypt_time, :data_bits, :key, :rounds, :functions_prefix])
       |> Map.update(:constraints, [], fn val -> val || [] end)
 
     # Run the standard Ash attribute transform
@@ -62,10 +62,10 @@ defmodule AshFeistelCipher do
        attribute_struct
        |> Map.put(:__feistel_cipher__, %{
          from: from,
-         data_bits: data_bits,
          time_bits: time_bits,
          time_bucket: time_bucket,
          encrypt_time: encrypt_time,
+         data_bits: data_bits,
          key: key,
          rounds: rounds,
          functions_prefix: functions_prefix
@@ -80,12 +80,6 @@ defmodule AshFeistelCipher do
       required: true,
       doc:
         "Integer attribute to encrypt. Can be any integer attribute. Use `integer_sequence` for an auto-generated bigserial column, or use any regular integer attribute."
-    ],
-    data_bits: [
-      type: :integer,
-      default: 40,
-      doc:
-        "The number of bits for data encryption. Must be an even number between 0 and 62. Cannot be changed after records are created. Default is 40."
     ],
     time_bits: [
       type: :integer,
@@ -104,6 +98,12 @@ defmodule AshFeistelCipher do
       default: false,
       doc:
         "Whether to encrypt time_bits with feistel cipher. When true, time_bits must be even and >= 2. Default is false. Cannot be changed after records are created."
+    ],
+    data_bits: [
+      type: :integer,
+      default: 40,
+      doc:
+        "The number of bits for data encryption. Must be an even number between 0 and 62. Cannot be changed after records are created. Default is 40."
     ],
     key: [
       type: :integer,
