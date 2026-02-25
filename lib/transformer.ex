@@ -26,10 +26,10 @@ defmodule AshFeistelCipher.Transformer do
     opts = Map.get(attribute, :__feistel_cipher__)
     from_attr = opts.from
     to_attr = attribute.name
-    data_bits = opts.data_bits
     time_bits = opts.time_bits
     time_bucket = opts.time_bucket
     encrypt_time = opts.encrypt_time
+    data_bits = opts.data_bits
     key = opts.key
     rounds = opts.rounds
     functions_prefix = opts.functions_prefix
@@ -41,10 +41,10 @@ defmodule AshFeistelCipher.Transformer do
     prefix = dsl_state |> Transformer.get_option([:postgres], :schema) || "public"
 
     # Apply defaults at compile time
-    data_bits = data_bits || 40
     time_bits = time_bits || 12
     time_bucket = time_bucket || 86400
     encrypt_time = if is_nil(encrypt_time), do: false, else: encrypt_time
+    data_bits = data_bits || 40
     rounds = rounds || 16
     functions_prefix = functions_prefix || "public"
     key = key || FeistelCipher.generate_key(prefix, table, from_column, to_column)
