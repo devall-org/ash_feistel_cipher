@@ -54,7 +54,7 @@ defmodule AshFeistelCipher.Transformer do
 
     up = """
     execute(
-      FeistelCipher.up_for_trigger(#{inspect(prefix)}, #{inspect(table)}, #{inspect(from_column)}, #{inspect(to_column)},
+      FeistelCipher.up_for_v1_trigger(#{inspect(prefix)}, #{inspect(table)}, #{inspect(from_column)}, #{inspect(to_column)},
         time_bits: #{time_bits},
         time_bucket: #{time_bucket},
         encrypt_time: #{encrypt_time},
@@ -68,7 +68,7 @@ defmodule AshFeistelCipher.Transformer do
 
     down = """
     execute(
-      FeistelCipher.down_for_trigger(#{inspect(prefix)}, #{inspect(table)}, #{inspect(from_column)}, #{inspect(to_column)})
+      FeistelCipher.down_for_v1_trigger(#{inspect(prefix)}, #{inspect(table)}, #{inspect(from_column)}, #{inspect(to_column)})
     )
     """
 
