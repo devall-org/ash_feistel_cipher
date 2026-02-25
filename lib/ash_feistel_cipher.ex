@@ -2,7 +2,16 @@ defmodule AshFeistelCipher do
   defmodule EncryptedIntegerAttribute do
     @moduledoc false
     # Feistel-specific fields
-    @feistel_fields [:from, :time_bits, :time_bucket, :encrypt_time, :data_bits, :key, :rounds, :functions_prefix]
+    @feistel_fields [
+      :from,
+      :time_bits,
+      :time_bucket,
+      :encrypt_time,
+      :data_bits,
+      :key,
+      :rounds,
+      :functions_prefix
+    ]
     # Ash.Resource.Attribute fields
     @ash_fields Ash.Resource.Attribute.attribute_schema() |> Keyword.keys()
 
@@ -50,7 +59,16 @@ defmodule AshFeistelCipher do
     ash_attr_map =
       entity
       |> Map.from_struct()
-      |> Map.drop([:from, :time_bits, :time_bucket, :encrypt_time, :data_bits, :key, :rounds, :functions_prefix])
+      |> Map.drop([
+        :from,
+        :time_bits,
+        :time_bucket,
+        :encrypt_time,
+        :data_bits,
+        :key,
+        :rounds,
+        :functions_prefix
+      ])
       |> Map.update(:constraints, [], fn val -> val || [] end)
 
     # Run the standard Ash attribute transform
