@@ -31,7 +31,7 @@ defmodule AshFeistelCipher.MixProject do
   defp deps do
     [
       {:igniter, "~> 0.6", optional: true},
-      {:feistel_cipher, path: "../feistel_cipher"},
+      {:feistel_cipher, github: "devall-org/feistel_cipher", branch: "main"},
       {:ash, "~> 3.0"},
       {:ash_postgres, "~> 2.0"},
       {:spark, "~> 2.0"},
