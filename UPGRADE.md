@@ -35,8 +35,10 @@ This composes `feistel_cipher.upgrade` to generate an Ecto migration template. E
 3. **Regenerate Ash migrations**:
 
 ```bash
-mix ash.codegen upgrade_feistel_cipher
+mix ash.codegen --name upgrade_feistel_v1
 ```
+
+In the generated migration, replace `down_for_v1_trigger` with `force_down_for_legacy_trigger` in the `up` function (to drop legacy triggers).
 
 ---
 
