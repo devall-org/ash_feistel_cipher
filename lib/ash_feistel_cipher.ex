@@ -47,10 +47,10 @@ defmodule AshFeistelCipher do
   def transform(%EncryptedIntegerAttribute{} = entity) do
     # Extract feistel-specific options
     from = entity.from
-    data_bits = entity.data_bits
     time_bits = entity.time_bits
     time_bucket = entity.time_bucket
     encrypt_time = entity.encrypt_time
+    data_bits = entity.data_bits
     key = entity.key
     rounds = entity.rounds
     functions_prefix = entity.functions_prefix
