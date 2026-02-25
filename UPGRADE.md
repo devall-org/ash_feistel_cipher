@@ -10,7 +10,7 @@
 
 ### Steps
 
-1. **Update source code** — replace `bits:` with `time_bits: 0, data_bits:` in your Ash resources:
+1. **Update source code** -- replace `bits:` with `time_bits: 0, data_bits:` in your Ash resources:
 
 ```elixir
 # Before (v0.x)
@@ -24,18 +24,42 @@ If `bits` was not specified (default was 52), add `time_bits: 0, data_bits: 52` 
 
 > **Note**: The project won't compile until all `bits:` usages are replaced, because `bits:` is no longer a valid option in v1.0.
 
-2. **Upgrade database** — generate the migration for upgrading PostgreSQL functions:
+2. **Generate function install migration**:
 
 ```bash
 mix ash_feistel_cipher.upgrade
 ```
 
-This composes `feistel_cipher.upgrade` to generate an Ecto migration template. Edit the generated migration to fill in your `functions_salt` and trigger details. See [feistel_cipher UPGRADE.md](https://github.com/devall-org/feistel_cipher/blob/main/UPGRADE.md) for details.
+3. **Fill in `functions_salt`** in the generated migration. Find your original salt in the migration with timestamp `19730501000000`.
 
-3. **Regenerate Ash migrations**:
+4. **Generate trigger migration** via Ash codegen:
 
 ```bash
-mix ash.codegen upgrade_feistel_cipher
+mix ash.codegen --name upgrade_feistel_v1
+```
+
+5. **Fix the generated trigger migration**: In the generated migration, replace `down_for_trigger` with `force_down_for_trigger`. This is needed because the old trigger must be force-dropped before the new v1 trigger can be created.
+
+6. **(Optional)** Add old function cleanup to the **last** migration. Which functions exist depends on the version you're upgrading from:
+
+   ```elixir
+   # v0.15.0
+   execute "DROP FUNCTION IF EXISTS public.feistel_cipher(bigint, int, bigint, int)"
+   execute "DROP FUNCTION IF EXISTS public.feistel_column_trigger()"
+
+   # v0.14.0
+   execute "DROP FUNCTION IF EXISTS public.feistel_encrypt(bigint, int, bigint, int)"
+   execute "DROP FUNCTION IF EXISTS public.feistel_column_trigger()"
+
+   # v0.13.x or earlier
+   execute "DROP FUNCTION IF EXISTS public.feistel(bigint, int, bigint)"
+   execute "DROP FUNCTION IF EXISTS public.handle_feistel_encryption()"
+   ```
+
+7. **Run migrations**:
+
+```bash
+mix ecto.migrate
 ```
 
 ---

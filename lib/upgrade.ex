@@ -66,8 +66,21 @@ if Code.ensure_loaded?(Igniter) do
         |> maybe_add_option("--repo", opts[:repo])
         |> maybe_add_option("--functions-prefix", opts[:functions_prefix])
 
+      notice = """
+
+      ⚠️  Next steps:
+        1. Edit the generated migration to fill in your functions_salt
+           (find it in the migration with timestamp 19730501000000)
+        2. Run `mix ash.codegen --name upgrade_feistel_v1`
+        3. In the generated migration, replace `down_for_trigger` with `force_down_for_trigger`
+        4. Optionally add old function cleanup to the last migration
+
+        See https://github.com/devall-org/ash_feistel_cipher/blob/main/UPGRADE.md
+      """
+
       igniter
       |> Igniter.compose_task("feistel_cipher.upgrade", feistel_cipher_argv)
+      |> Igniter.add_notice(notice)
     end
 
     defp maybe_add_option(argv, _flag, nil), do: argv
