@@ -26,10 +26,10 @@ defmodule AshFeistelCipher.TransformerTest do
       assert statement.up =~ "\"valid_resources\""
       assert statement.up =~ ":seq"
       assert statement.up =~ ":id"
-      # default data_bits
-      assert statement.up =~ "data_bits: 40"
       # default time_bits
       assert statement.up =~ "time_bits: 12"
+      # default data_bits
+      assert statement.up =~ "data_bits: 40"
       # default rounds
       assert statement.up =~ "rounds: 16"
       assert statement.up =~ "functions_prefix: \"public\""
