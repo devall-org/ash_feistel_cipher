@@ -119,7 +119,7 @@ defmodule MyApp.Repo.Migrations.CreatePost do
     execute(
       FeistelCipher.up_for_trigger("public", "posts", "seq", "id",
         time_bits: 12,
-        time_bucket: 86400,
+        time_bucket: 3600,
         encrypt_time: false,
         data_bits: 40,
         key: 1_984_253_769,
@@ -229,7 +229,7 @@ Required:
 
 Optional (⚠️ **Cannot be changed after records are created**):
 - `time_bits` (default: 12): Time prefix bits for backup optimization. Set to 0 for no time prefix
-- `time_bucket` (default: 86400): Time bucket size in seconds
+- `time_bucket` (default: 3600): Time bucket size in seconds
 - `encrypt_time` (default: false): Whether to encrypt the time prefix
 - `data_bits` (default: 40): Data encryption bit size (must be even)
 - `key`: Custom encryption key (auto-generated from table/column names if not provided)
