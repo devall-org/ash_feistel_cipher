@@ -26,8 +26,10 @@ defmodule AshFeistelCipher.TransformerTest do
       assert statement.up =~ "\"valid_resources\""
       assert statement.up =~ ":seq"
       assert statement.up =~ ":id"
-      # default bits
-      assert statement.up =~ "bits: 52"
+      # default data_bits
+      assert statement.up =~ "data_bits: 40"
+      # default time_bits
+      assert statement.up =~ "time_bits: 12"
       # default rounds
       assert statement.up =~ "rounds: 16"
       assert statement.up =~ "functions_prefix: \"public\""
@@ -49,17 +51,17 @@ defmodule AshFeistelCipher.TransformerTest do
       up_sqls = Enum.map(statements, & &1.up)
       assert Enum.all?(up_sqls, &(&1 =~ "FeistelCipher.up_for_trigger"))
 
-      # Verify first encrypt (seq -> id) with default bits 52
+      # Verify first encrypt (seq -> id) with custom data_bits 52
       id_statement = Enum.find(statements, &(&1.up =~ ":id,"))
       assert id_statement.up =~ ":seq"
       assert id_statement.up =~ ":id"
-      assert id_statement.up =~ "bits: 52"
+      assert id_statement.up =~ "data_bits: 52"
 
-      # Verify second encrypt (seq -> referral_code) with custom bits and key
+      # Verify second encrypt (seq -> referral_code) with custom data_bits and key
       referral_statement = Enum.find(statements, &(&1.up =~ ":referral_code,"))
       assert referral_statement.up =~ ":seq"
       assert referral_statement.up =~ ":referral_code"
-      assert referral_statement.up =~ "bits: 40"
+      assert referral_statement.up =~ "data_bits: 40"
       assert referral_statement.up =~ "key: 12_345"
     end
   end
@@ -71,9 +73,7 @@ defmodule AshFeistelCipher.TransformerTest do
       assert length(statements) == 1
       [statement] = statements
 
-      assert statement.up =~ "bits: 40"
-      # should not use default
-      refute statement.up =~ "bits: 52"
+      assert statement.up =~ "data_bits: 40"
     end
 
     test "applies custom key configuration" do
@@ -223,15 +223,14 @@ defmodule AshFeistelCipher.TransformerTest do
       assert id_attr.generated? == true
     end
 
-    test "allows overriding encryption options (bits, key, rounds)" do
+    test "allows overriding encryption options (data_bits, key, rounds)" do
       statements = get_custom_statements(AshFeistelCipher.Test.PrimaryKeyCustomOptionsResource)
 
       assert length(statements) == 1
       [statement] = statements
 
-      # Verify custom bits (40)
-      assert statement.up =~ "bits: 40"
-      refute statement.up =~ "bits: 52"
+      # Verify custom data_bits (40)
+      assert statement.up =~ "data_bits: 40"
 
       # Verify custom key with underscores
       assert statement.up =~ "key: 12_345"

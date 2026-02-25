@@ -2,7 +2,7 @@ defmodule AshFeistelCipher do
   defmodule EncryptedIntegerAttribute do
     @moduledoc false
     # Feistel-specific fields
-    @feistel_fields [:from, :bits, :key, :rounds, :functions_prefix]
+    @feistel_fields [:from, :data_bits, :time_bits, :time_bucket, :encrypt_time, :key, :rounds, :functions_prefix]
     # Ash.Resource.Attribute fields
     @ash_fields Ash.Resource.Attribute.attribute_schema() |> Keyword.keys()
 
@@ -38,7 +38,10 @@ defmodule AshFeistelCipher do
   def transform(%EncryptedIntegerAttribute{} = entity) do
     # Extract feistel-specific options
     from = entity.from
-    bits = entity.bits
+    data_bits = entity.data_bits
+    time_bits = entity.time_bits
+    time_bucket = entity.time_bucket
+    encrypt_time = entity.encrypt_time
     key = entity.key
     rounds = entity.rounds
     functions_prefix = entity.functions_prefix
@@ -47,7 +50,7 @@ defmodule AshFeistelCipher do
     ash_attr_map =
       entity
       |> Map.from_struct()
-      |> Map.drop([:from, :bits, :key, :rounds, :functions_prefix])
+      |> Map.drop([:from, :data_bits, :time_bits, :time_bucket, :encrypt_time, :key, :rounds, :functions_prefix])
       |> Map.update(:constraints, [], fn val -> val || [] end)
 
     # Run the standard Ash attribute transform
@@ -59,7 +62,10 @@ defmodule AshFeistelCipher do
        attribute_struct
        |> Map.put(:__feistel_cipher__, %{
          from: from,
-         bits: bits,
+         data_bits: data_bits,
+         time_bits: time_bits,
+         time_bucket: time_bucket,
+         encrypt_time: encrypt_time,
          key: key,
          rounds: rounds,
          functions_prefix: functions_prefix
@@ -75,17 +81,35 @@ defmodule AshFeistelCipher do
       doc:
         "Integer attribute to encrypt. Can be any integer attribute. Use `integer_sequence` for an auto-generated bigserial column, or use any regular integer attribute."
     ],
-    bits: [
+    data_bits: [
       type: :integer,
-      default: 52,
+      default: 40,
       doc:
-        "The number of bits for encryption. Must be an even number between 2 and 62. Cannot be changed after records are created. Default is 52 for JavaScript interoperability."
+        "The number of bits for data encryption. Must be an even number between 0 and 62. Cannot be changed after records are created. Default is 40."
+    ],
+    time_bits: [
+      type: :integer,
+      default: 12,
+      doc:
+        "The number of bits for time prefix. Set to 0 for no time prefix (backward compatible with v0.x). Cannot be changed after records are created. Default is 12."
+    ],
+    time_bucket: [
+      type: :integer,
+      default: 86400,
+      doc:
+        "Time bucket size in seconds for the time prefix. Default is 86400 (1 day). Cannot be changed after records are created."
+    ],
+    encrypt_time: [
+      type: :boolean,
+      default: false,
+      doc:
+        "Whether to encrypt time_bits with feistel cipher. When true, time_bits must be even and >= 2. Default is false. Cannot be changed after records are created."
     ],
     key: [
       type: :integer,
       required: false,
       doc:
-        "The encryption key to use for the Feistel cipher. Must be between 0 and 2^31-1 (2,147,483,647). If not provided, a key will be derived from the table name, column names, and bits. Cannot be changed after records are created."
+        "The encryption key to use for the Feistel cipher. Must be between 0 and 2^31-1 (2,147,483,647). If not provided, a key will be derived from the table name and column names. Cannot be changed after records are created."
     ],
     rounds: [
       type: :integer,
@@ -112,7 +136,7 @@ defmodule AshFeistelCipher do
       "encrypted_integer :id, from: :seq, primary_key?: true",
       "encrypted_integer :referral_code, from: :seq, key: 12345",
       "encrypted_integer :optional_id, from: :seq, allow_nil?: true",
-      "encrypted_integer :id, from: :seq, bits: 40, functions_prefix: \"accounts\""
+      "encrypted_integer :id, from: :seq, data_bits: 40, functions_prefix: \"accounts\""
     ],
     args: [:name],
     target: AshFeistelCipher.EncryptedIntegerAttribute,
@@ -139,7 +163,7 @@ defmodule AshFeistelCipher do
     """,
     examples: [
       "encrypted_integer_primary_key :id, from: :seq",
-      "encrypted_integer_primary_key :id, from: :seq, bits: 40",
+      "encrypted_integer_primary_key :id, from: :seq, data_bits: 40",
       "encrypted_integer_primary_key :id, from: :seq, key: 12345, rounds: 8"
     ],
     args: [:name],
