@@ -21,7 +21,7 @@ defmodule AshFeistelCipher.TransformerTest do
       assert statement.down != nil
 
       # Verify up contains function call with expected parameters
-      assert statement.up =~ "FeistelCipher.up_for_trigger"
+      assert statement.up =~ "FeistelCipher.up_for_v1_trigger"
       assert statement.up =~ "\"public\""
       assert statement.up =~ "\"valid_resources\""
       assert statement.up =~ ":seq"
@@ -35,7 +35,7 @@ defmodule AshFeistelCipher.TransformerTest do
       assert statement.up =~ "functions_prefix: \"public\""
 
       # Verify down contains function call
-      assert statement.down =~ "FeistelCipher.down_for_trigger"
+      assert statement.down =~ "FeistelCipher.down_for_v1_trigger"
       assert statement.down =~ "\"public\""
       assert statement.down =~ "\"valid_resources\""
       assert statement.down =~ ":seq"
@@ -49,7 +49,7 @@ defmodule AshFeistelCipher.TransformerTest do
 
       # Check that both function calls are created
       up_sqls = Enum.map(statements, & &1.up)
-      assert Enum.all?(up_sqls, &(&1 =~ "FeistelCipher.up_for_trigger"))
+      assert Enum.all?(up_sqls, &(&1 =~ "FeistelCipher.up_for_v1_trigger"))
 
       # Verify first encrypt (seq -> id) with custom data_bits 52
       id_statement = Enum.find(statements, &(&1.up =~ ":id,"))
@@ -147,7 +147,7 @@ defmodule AshFeistelCipher.TransformerTest do
       assert length(statements) == 1
       [statement] = statements
 
-      assert statement.down =~ "FeistelCipher.down_for_trigger"
+      assert statement.down =~ "FeistelCipher.down_for_v1_trigger"
       assert statement.down =~ "\"public\""
       assert statement.down =~ "\"valid_resources\""
       assert statement.down =~ ":seq"
@@ -160,7 +160,7 @@ defmodule AshFeistelCipher.TransformerTest do
       assert length(statements) == 2
 
       down_sqls = Enum.map(statements, & &1.down)
-      assert Enum.all?(down_sqls, &(&1 =~ "FeistelCipher.down_for_trigger"))
+      assert Enum.all?(down_sqls, &(&1 =~ "FeistelCipher.down_for_v1_trigger"))
       assert Enum.any?(down_sqls, &(&1 =~ ":id"))
       assert Enum.any?(down_sqls, &(&1 =~ ":referral_code"))
     end
@@ -208,7 +208,7 @@ defmodule AshFeistelCipher.TransformerTest do
       [statement] = statements
 
       # Verify function call is created correctly
-      assert statement.up =~ "FeistelCipher.up_for_trigger"
+      assert statement.up =~ "FeistelCipher.up_for_v1_trigger"
       assert statement.up =~ "\"public\""
       assert statement.up =~ "\"primary_key_resources\""
 
@@ -254,12 +254,12 @@ defmodule AshFeistelCipher.TransformerTest do
       [statement] = statements
 
       # Verify function call structure
-      assert statement.up =~ "FeistelCipher.up_for_trigger"
+      assert statement.up =~ "FeistelCipher.up_for_v1_trigger"
       assert statement.up =~ ":seq"
       assert statement.up =~ ":id"
 
       # Verify down function call
-      assert statement.down =~ "FeistelCipher.down_for_trigger"
+      assert statement.down =~ "FeistelCipher.down_for_v1_trigger"
       assert statement.down =~ "\"public\""
       assert statement.down =~ "\"primary_key_resources\""
       assert statement.down =~ ":seq"
