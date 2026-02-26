@@ -4,8 +4,8 @@
 
 ### What changed
 
-- **`bits` option renamed to `data_bits`** (default changed from 52 to 40)
-- **New DSL options**: `time_bits` (default: 12), `time_bucket` (default: 86400), `encrypt_time` (default: false)
+- **`bits` option renamed to `data_bits`** (default changed from 52 to 38)
+- **New DSL options**: `time_bits` (default: 14), `time_bucket` (default: 86400), `encrypt_time` (default: false)
 - **Depends on `feistel_cipher ~> 1.0`** (PG functions use `_v1` suffix)
 
 ### Steps

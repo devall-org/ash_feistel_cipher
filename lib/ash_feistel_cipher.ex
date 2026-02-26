@@ -101,9 +101,9 @@ defmodule AshFeistelCipher do
     ],
     time_bits: [
       type: :integer,
-      default: 12,
+      default: 14,
       doc:
-        "The number of bits for time prefix. Set to 0 for no time prefix (backward compatible with v0.x). Cannot be changed after records are created. Default is 12."
+        "The number of bits for time prefix. Set to 0 for no time prefix (backward compatible with v0.x). Cannot be changed after records are created. Default is 14."
     ],
     time_bucket: [
       type: :integer,
@@ -119,9 +119,9 @@ defmodule AshFeistelCipher do
     ],
     data_bits: [
       type: :integer,
-      default: 40,
+      default: 38,
       doc:
-        "The number of bits for data encryption. Must be an even number between 0 and 62. Cannot be changed after records are created. Default is 40."
+        "The number of bits for data encryption. Must be an even number between 0 and 62. Cannot be changed after records are created. Default is 38."
     ],
     key: [
       type: :integer,
