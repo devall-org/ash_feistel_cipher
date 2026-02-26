@@ -101,9 +101,9 @@ defmodule AshFeistelCipher do
     ],
     time_bits: [
       type: :integer,
-      default: 14,
+      default: 15,
       doc:
-        "The number of bits for time prefix. Set to 0 for no time prefix (backward compatible with v0.x). Cannot be changed after records are created. Default is 14."
+        "The number of bits for time prefix. Set to 0 for no time prefix (backward compatible with v0.x). Cannot be changed after records are created. Default is 15."
     ],
     time_bucket: [
       type: :integer,
