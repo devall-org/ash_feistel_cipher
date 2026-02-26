@@ -227,7 +227,7 @@ encrypted_integer_primary_key :id, from: :seq, data_bits: 32
 Required:
 - `from`: Integer attribute to encrypt (can be any integer attribute)
 
-Optional (⚠️ **Cannot be changed after records are created**):
+Optional (⚠️ **Treat changes as explicit migrations**):
 - `time_bits` (default: 15): Time prefix bits for backup optimization. Set to 0 for no time prefix
 - `time_bucket` (default: 86400): Time bucket size in seconds
 - With defaults (`time_bits: 15`, `time_bucket: 86400`, `encrypt_time: false`), the time prefix wraps after about 89 years 9 months
