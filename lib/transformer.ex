@@ -42,7 +42,7 @@ defmodule AshFeistelCipher.Transformer do
 
     # Apply defaults at compile time
     time_bits = time_bits || 12
-    time_bucket = time_bucket || 3600
+    time_bucket = time_bucket || 86400
     encrypt_time = if is_nil(encrypt_time), do: false, else: encrypt_time
     data_bits = data_bits || 40
     rounds = rounds || 16
