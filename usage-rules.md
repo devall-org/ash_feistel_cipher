@@ -103,7 +103,7 @@ encrypted_integer_primary_key :id, from: :seq, bits: 40
 - `from`: Integer attribute to encrypt (required)
 
 ### Optional
-⚠️ **Cannot be changed after records are created**:
+⚠️ **Treat changes as explicit migrations**:
 - `bits` (default: 52): Encryption bit size. Determines ID range (40 bits = ~1 trillion, 52 bits = ~4.5 quadrillion)
 - `key`: Encryption key (auto-generated from table/column names if not provided)
 - `rounds` (default: 16): Number of Feistel rounds (higher = more secure but slower)
@@ -150,9 +150,9 @@ attributes do
 end
 ```
 
-### Cannot Change After Creation
+### Migration Required For Parameter Changes
 
-These options cannot be changed after records are created:
+These options should be treated as immutable in-place once records exist:
 - `bits`
 - `key`
 - `rounds`
@@ -248,4 +248,3 @@ Don't expose sequential IDs directly:
 ### Changing Encryption Settings
 
 Cannot change `bits`, `key`, `rounds` after records are created. Requires data migration to change.
-

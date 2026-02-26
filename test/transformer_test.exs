@@ -27,7 +27,7 @@ defmodule AshFeistelCipher.TransformerTest do
       assert statement.up =~ ":seq"
       assert statement.up =~ ":id"
       # default time_bits
-      assert statement.up =~ "time_bits: 14"
+      assert statement.up =~ "time_bits: 15"
       # default data_bits
       assert statement.up =~ "data_bits: 38"
       # default rounds

@@ -101,39 +101,39 @@ defmodule AshFeistelCipher do
     ],
     time_bits: [
       type: :integer,
-      default: 14,
+      default: 15,
       doc:
-        "The number of bits for time prefix. Set to 0 for no time prefix (backward compatible with v0.x). Cannot be changed after records are created. Default is 14."
+        "The number of bits for time prefix. Set to 0 for no time prefix (backward compatible with v0.x). Can be changed, but should be treated as an explicit migration because old/new IDs will use different time-prefix semantics. Default is 15."
     ],
     time_bucket: [
       type: :integer,
       default: 86400,
       doc:
-        "Time bucket size in seconds for the time prefix. Default is 86400 (1 day). Cannot be changed after records are created."
+        "Time bucket size in seconds for the time prefix. Default is 86400 (1 day). Can be changed, but should be treated as an explicit migration because clustering behavior changes immediately."
     ],
     encrypt_time: [
       type: :boolean,
       default: false,
       doc:
-        "Whether to encrypt time_bits with feistel cipher. When true, time_bits must be even and >= 2. Default is false. Cannot be changed after records are created."
+        "Whether to encrypt time_bits with feistel cipher. When true, time_bits must be even and >= 2. Default is false. Can be changed, but should be treated as an explicit migration because time-prefix interpretation changes."
     ],
     data_bits: [
       type: :integer,
       default: 38,
       doc:
-        "The number of bits for data encryption. Must be an even number between 0 and 62. Cannot be changed after records are created. Default is 38."
+        "The number of bits for data encryption. Must be an even number between 0 and 62. Should be treated as immutable in-place; changing it requires a planned migration. Default is 38."
     ],
     key: [
       type: :integer,
       required: false,
       doc:
-        "The encryption key to use for the Feistel cipher. Must be between 0 and 2^31-1 (2,147,483,647). If not provided, a key will be derived from the table name and column names. Cannot be changed after records are created."
+        "The encryption key to use for the Feistel cipher. Must be between 0 and 2^31-1 (2,147,483,647). If not provided, a key will be derived from the table name and column names. Should be treated as immutable in-place; changing it requires a planned migration."
     ],
     rounds: [
       type: :integer,
       default: 16,
       doc:
-        "Number of Feistel rounds. Must be between 1 and 32. More rounds = more secure but slower. Default is 16 for good security/performance balance. Cannot be changed after records are created."
+        "Number of Feistel rounds. Must be between 1 and 32. More rounds = more secure but slower. Default is 16 for good security/performance balance. Should be treated as immutable in-place; changing it requires a planned migration."
     ],
     functions_prefix: [
       type: :string,

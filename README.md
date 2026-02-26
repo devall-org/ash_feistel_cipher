@@ -118,7 +118,7 @@ defmodule MyApp.Repo.Migrations.CreatePost do
     # Automatically generates trigger for seq -> id encryption
     execute(
       FeistelCipher.up_for_trigger("public", "posts", "seq", "id",
-        time_bits: 14,
+        time_bits: 15,
         time_bucket: 86400,
         encrypt_time: false,
         data_bits: 38,
@@ -227,10 +227,10 @@ encrypted_integer_primary_key :id, from: :seq, data_bits: 32
 Required:
 - `from`: Integer attribute to encrypt (can be any integer attribute)
 
-Optional (⚠️ **Cannot be changed after records are created**):
-- `time_bits` (default: 14): Time prefix bits for backup optimization. Set to 0 for no time prefix
+Optional (⚠️ **Treat changes as explicit migrations**):
+- `time_bits` (default: 15): Time prefix bits for backup optimization. Set to 0 for no time prefix
 - `time_bucket` (default: 86400): Time bucket size in seconds
-- With defaults (`time_bits: 14`, `time_bucket: 86400`, `encrypt_time: false`), the time prefix wraps after about 44 years 10 months
+- With defaults (`time_bits: 15`, `time_bucket: 86400`, `encrypt_time: false`), the time prefix wraps after about 89 years 9 months
 - `encrypt_time` (default: false): Whether to encrypt the time prefix
 - `data_bits` (default: 38): Data encryption bit size (must be even)
 - `key`: Custom encryption key (auto-generated from table/column names if not provided)
