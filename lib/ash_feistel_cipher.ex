@@ -107,9 +107,9 @@ defmodule AshFeistelCipher do
     ],
     time_bucket: [
       type: :integer,
-      default: 3600,
+      default: 86400,
       doc:
-        "Time bucket size in seconds for the time prefix. Default is 3600 (1 hour). Cannot be changed after records are created."
+        "Time bucket size in seconds for the time prefix. Default is 86400 (1 day). Cannot be changed after records are created."
     ],
     encrypt_time: [
       type: :boolean,
