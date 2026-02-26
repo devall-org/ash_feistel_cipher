@@ -118,10 +118,10 @@ defmodule MyApp.Repo.Migrations.CreatePost do
     # Automatically generates trigger for seq -> id encryption
     execute(
       FeistelCipher.up_for_trigger("public", "posts", "seq", "id",
-        time_bits: 12,
+        time_bits: 14,
         time_bucket: 86400,
         encrypt_time: false,
-        data_bits: 40,
+        data_bits: 38,
         key: 1_984_253_769,
         rounds: 16,
         functions_prefix: "public"
@@ -161,7 +161,7 @@ attributes do
   integer_sequence :seq
   encrypted_integer_primary_key :id,
     from: :seq,
-    data_bits: 32  # ~4 billion IDs (default: 40 = ~1 trillion)
+    data_bits: 32  # ~4 billion IDs (default: 38 = ~275 billion)
 end
 ```
 
@@ -228,10 +228,11 @@ Required:
 - `from`: Integer attribute to encrypt (can be any integer attribute)
 
 Optional (⚠️ **Cannot be changed after records are created**):
-- `time_bits` (default: 12): Time prefix bits for backup optimization. Set to 0 for no time prefix
+- `time_bits` (default: 14): Time prefix bits for backup optimization. Set to 0 for no time prefix
 - `time_bucket` (default: 86400): Time bucket size in seconds
+- With defaults (`time_bits: 14`, `time_bucket: 86400`, `encrypt_time: false`), the time prefix wraps after about 44 years 10 months
 - `encrypt_time` (default: false): Whether to encrypt the time prefix
-- `data_bits` (default: 40): Data encryption bit size (must be even)
+- `data_bits` (default: 38): Data encryption bit size (must be even)
 - `key`: Custom encryption key (auto-generated from table/column names if not provided)
 - `rounds` (default: 16): Number of Feistel rounds (higher = more secure but slower)
 - `functions_prefix` (default: "public"): PostgreSQL schema where feistel functions are installed

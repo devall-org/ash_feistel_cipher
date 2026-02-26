@@ -41,10 +41,10 @@ defmodule AshFeistelCipher.Transformer do
     prefix = dsl_state |> Transformer.get_option([:postgres], :schema) || "public"
 
     # Apply defaults at compile time
-    time_bits = time_bits || 12
+    time_bits = time_bits || 14
     time_bucket = time_bucket || 86400
     encrypt_time = if is_nil(encrypt_time), do: false, else: encrypt_time
-    data_bits = data_bits || 40
+    data_bits = data_bits || 38
     rounds = rounds || 16
     functions_prefix = functions_prefix || "public"
     key = key || FeistelCipher.generate_key(prefix, table, from_column, to_column)
