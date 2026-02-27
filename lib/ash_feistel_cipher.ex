@@ -6,6 +6,7 @@ defmodule AshFeistelCipher do
       :from,
       :time_bits,
       :time_bucket,
+      :time_offset,
       :encrypt_time,
       :data_bits,
       :key,
@@ -49,6 +50,7 @@ defmodule AshFeistelCipher do
     from = entity.from
     time_bits = entity.time_bits
     time_bucket = entity.time_bucket
+    time_offset = entity.time_offset
     encrypt_time = entity.encrypt_time
     data_bits = entity.data_bits
     key = entity.key
@@ -63,6 +65,7 @@ defmodule AshFeistelCipher do
         :from,
         :time_bits,
         :time_bucket,
+        :time_offset,
         :encrypt_time,
         :data_bits,
         :key,
@@ -82,6 +85,7 @@ defmodule AshFeistelCipher do
          from: from,
          time_bits: time_bits,
          time_bucket: time_bucket,
+         time_offset: time_offset,
          encrypt_time: encrypt_time,
          data_bits: data_bits,
          key: key,
@@ -110,6 +114,12 @@ defmodule AshFeistelCipher do
       default: 86400,
       doc:
         "Time bucket size in seconds for the time prefix. Default is 86400 (1 day). Can be changed, but should be treated as an explicit migration because clustering behavior changes immediately."
+    ],
+    time_offset: [
+      type: :integer,
+      default: 0,
+      doc:
+        "Time offset in seconds applied before bucket calculation. For example, 21600 shifts a daily bucket boundary from 00:00 UTC to 18:00 UTC (03:00 KST). Default is 0. Can be changed, but should be treated as an explicit migration because clustering behavior changes immediately."
     ],
     encrypt_time: [
       type: :boolean,
