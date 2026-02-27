@@ -28,6 +28,7 @@ defmodule AshFeistelCipher.Transformer do
     to_attr = attribute.name
     time_bits = opts.time_bits
     time_bucket = opts.time_bucket
+    time_offset = opts.time_offset
     encrypt_time = opts.encrypt_time
     data_bits = opts.data_bits
     key = opts.key
@@ -43,6 +44,7 @@ defmodule AshFeistelCipher.Transformer do
     # Apply defaults at compile time
     time_bits = time_bits || 15
     time_bucket = time_bucket || 86400
+    time_offset = time_offset || 0
     encrypt_time = if is_nil(encrypt_time), do: false, else: encrypt_time
     data_bits = data_bits || 38
     rounds = rounds || 16
@@ -57,6 +59,7 @@ defmodule AshFeistelCipher.Transformer do
       FeistelCipher.up_for_v1_trigger(#{inspect(prefix)}, #{inspect(table)}, #{inspect(from_column)}, #{inspect(to_column)},
         time_bits: #{time_bits},
         time_bucket: #{time_bucket},
+        time_offset: #{time_offset},
         encrypt_time: #{encrypt_time},
         data_bits: #{data_bits},
         key: #{key_formatted},
