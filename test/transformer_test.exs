@@ -30,6 +30,7 @@ defmodule AshFeistelCipher.TransformerTest do
       assert statement.up =~ "time_bits: 15"
       # default data_bits
       assert statement.up =~ "data_bits: 38"
+      assert statement.up =~ "time_offset: 0"
       # default rounds
       assert statement.up =~ "rounds: 16"
       assert statement.up =~ "functions_prefix: \"public\""
@@ -93,6 +94,16 @@ defmodule AshFeistelCipher.TransformerTest do
 
       # Should have rounds parameter (8)
       assert statement.up =~ "rounds: 8"
+    end
+
+    test "applies custom time_offset configuration" do
+      statements = get_custom_statements(AshFeistelCipher.Test.CustomTimeOffsetResource)
+
+      assert length(statements) == 1
+      [statement] = statements
+
+      assert statement.up =~ "time_offset: 21600"
+      refute statement.up =~ "time_offset: 0"
     end
 
     test "uses default rounds (16) when not specified" do

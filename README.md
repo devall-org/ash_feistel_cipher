@@ -230,6 +230,9 @@ Required:
 Optional (⚠️ **Treat changes as explicit migrations**):
 - `time_bits` (default: 15): Time prefix bits for backup optimization. Set to 0 for no time prefix
 - `time_bucket` (default: 86400): Time bucket size in seconds
+- `time_offset` (default: 0): Time offset in seconds applied before bucket calculation
+  - Formula: `time_value = floor((epoch + time_offset) / time_bucket)`
+  - Example: `time_bucket: 86400`, `time_offset: 21600` shifts daily boundary from `00:00 UTC` to `18:00 UTC` (`03:00 KST`)
 - With defaults (`time_bits: 15`, `time_bucket: 86400`, `encrypt_time: false`), the time prefix wraps after about 89 years 9 months
 - `encrypt_time` (default: false): Whether to encrypt the time prefix
 - `data_bits` (default: 38): Data encryption bit size (must be even)
@@ -240,6 +243,12 @@ Optional (⚠️ **Treat changes as explicit migrations**):
 **Important**: 
 - `allow_nil?` on encrypted column must match `from` attribute's nullability
 - For primary keys, prefer `encrypted_integer_primary_key` for cleaner syntax
+
+### Why `time_offset` Is Needed
+
+Without `time_offset`, daily `time_bucket` boundaries are anchored to UTC midnight. In local operations this can split one business day into two buckets at an inconvenient local time (for example, 09:00 in Korea).
+
+`time_offset` allows teams to keep the same bucket size (for example, one day) while moving the boundary to an operational cutover hour (for example, 03:00 local). This is especially useful when `encrypt_time: true` is enabled and continuity must be controlled by configuration, not by reading the encrypted prefix.
 
 ## License
 
