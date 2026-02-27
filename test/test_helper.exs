@@ -2,6 +2,7 @@
 Code.require_file("support/verifier_helpers.ex", __DIR__)
 Code.require_file("support/repo.ex", __DIR__)
 Code.require_file("support/test_resources.ex", __DIR__)
+Code.require_file("support/custom_time_offset_resource.ex", __DIR__)
 Code.require_file("support/domain.ex", __DIR__)
 
 ExUnit.start()
