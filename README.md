@@ -247,7 +247,7 @@ Optional (⚠️ **Treat changes as explicit migrations**):
 
 ### Why `time_offset` Is Needed
 
-Without `time_offset`, daily `time_bucket` boundaries are anchored to UTC midnight. In local operations this can split one business day into two buckets at an inconvenient local time (for example, 09:00 in Korea).
+Without `time_offset`, daily `time_bucket` boundaries are anchored to UTC midnight. In local operations this can split one business day into two buckets at awkward local times (for example, evening in the Americas or early morning in Europe).
 
 `time_offset` allows teams to keep the same bucket size (for example, one day) while moving the boundary to an operational cutover hour (for example, 03:00 local). This is especially useful when `encrypt_time: true` is enabled and continuity must be controlled by configuration, not by reading the encrypted prefix.
 
