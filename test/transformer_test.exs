@@ -62,7 +62,7 @@ defmodule AshFeistelCipher.TransformerTest do
       referral_statement = Enum.find(statements, &(&1.up =~ ":referral_code,"))
       assert referral_statement.up =~ ":seq"
       assert referral_statement.up =~ ":referral_code"
-      assert referral_statement.up =~ "data_bits: 40"
+      assert referral_statement.up =~ "data_bits: 38"
       assert referral_statement.up =~ "key: 12_345"
     end
   end
@@ -148,6 +148,18 @@ defmodule AshFeistelCipher.TransformerTest do
       assert statement.up =~ ":enc_id"
       refute statement.up =~ ":sequence_number"
       refute statement.up =~ ":encrypted_id"
+    end
+
+    test "passes default time options when time_bits is 0" do
+      statements = get_custom_statements(AshFeistelCipher.Test.TimeBitsZeroResource)
+
+      assert length(statements) == 1
+      [statement] = statements
+
+      assert statement.up =~ "time_bits: 0"
+      assert statement.up =~ "time_bucket: 86400"
+      assert statement.up =~ "time_offset: 0"
+      assert statement.up =~ "encrypt_time: false"
     end
   end
 
@@ -240,8 +252,8 @@ defmodule AshFeistelCipher.TransformerTest do
       assert length(statements) == 1
       [statement] = statements
 
-      # Verify custom data_bits (40)
-      assert statement.up =~ "data_bits: 40"
+      # Verify custom data_bits (38)
+      assert statement.up =~ "data_bits: 38"
 
       # Verify custom key with underscores
       assert statement.up =~ "key: 12_345"

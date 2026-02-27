@@ -125,7 +125,7 @@ defmodule AshFeistelCipher do
       type: :boolean,
       default: false,
       doc:
-        "Whether to encrypt time_bits with feistel cipher. When true, time_bits must be even and >= 2. Default is false. Can be changed, but should be treated as an explicit migration because time-prefix interpretation changes."
+        "Whether to encrypt time_bits with feistel cipher. When true, time_bits must be even. Default is false. Can be changed, but should be treated as an explicit migration because time-prefix interpretation changes."
     ],
     data_bits: [
       type: :integer,

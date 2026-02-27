@@ -39,7 +39,7 @@ defmodule AshFeistelCipher.Test.MultipleEncryptsResource do
       allow_nil?: false,
       public?: true
 
-    encrypted_integer :referral_code, from: :seq, data_bits: 40, key: 12345
+    encrypted_integer :referral_code, from: :seq, data_bits: 38, key: 12345
     attribute :name, :string
   end
 end
@@ -196,6 +196,30 @@ defmodule AshFeistelCipher.Test.PrimaryKeyResource do
   end
 end
 
+defmodule AshFeistelCipher.Test.TimeBitsZeroResource do
+  @moduledoc false
+  use Ash.Resource,
+    domain: AshFeistelCipher.Test.Domain,
+    data_layer: AshPostgres.DataLayer,
+    extensions: [AshFeistelCipher]
+
+  postgres do
+    table "time_bits_zero_resources"
+    repo AshFeistelCipher.Test.Repo
+  end
+
+  attributes do
+    integer_sequence :seq
+
+    encrypted_integer :id,
+      from: :seq,
+      time_bits: 0,
+      primary_key?: true,
+      allow_nil?: false,
+      public?: true
+  end
+end
+
 defmodule AshFeistelCipher.Test.PrimaryKeyCustomOptionsResource do
   @moduledoc false
   use Ash.Resource,
@@ -210,7 +234,7 @@ defmodule AshFeistelCipher.Test.PrimaryKeyCustomOptionsResource do
 
   attributes do
     integer_sequence :seq
-    encrypted_integer_primary_key :id, from: :seq, data_bits: 40, key: 12345, rounds: 8
+    encrypted_integer_primary_key :id, from: :seq, data_bits: 38, key: 12345, rounds: 8
     attribute :name, :string
   end
 end

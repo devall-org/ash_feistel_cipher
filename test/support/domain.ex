@@ -11,5 +11,9 @@ defmodule AshFeistelCipher.Test.Domain do
     resource AshFeistelCipher.Test.CustomFunctionsPrefixResource
     resource AshFeistelCipher.Test.CustomSchemaResource
     resource AshFeistelCipher.Test.CustomRoundsResource
+    resource AshFeistelCipher.Test.PrimaryKeyResource
+    resource AshFeistelCipher.Test.TimeBitsZeroResource
+    resource AshFeistelCipher.Test.PrimaryKeyCustomOptionsResource
+    resource AshFeistelCipher.Test.CustomTimeOffsetResource
   end
 end
