@@ -7,6 +7,7 @@
 - **`bits` option renamed to `data_bits`** (default changed from 52 to 38)
 - **New DSL options**: `time_bits` (default: 15), `time_bucket` (default: 86400), `encrypt_time` (default: false)
 - **Depends on `feistel_cipher 1.0.0`** (PG functions use `_v1` suffix)
+- **Recommended default profile for new resources**: `time_bits: 15`, `data_bits: 38`
 
 ### Steps
 
