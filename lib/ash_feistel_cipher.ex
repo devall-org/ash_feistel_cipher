@@ -153,6 +153,14 @@ defmodule AshFeistelCipher do
     ]
   ]
 
+  @feistel_default_options_map (for {name, config} <- @feistel_options,
+                                    Keyword.has_key?(config, :default),
+                                    into: %{} do
+                                  {name, Keyword.fetch!(config, :default)}
+                                end)
+
+  def feistel_default_options, do: @feistel_default_options_map
+
   @encrypted_integer %Spark.Dsl.Entity{
     name: :encrypted_integer,
     describe: """
