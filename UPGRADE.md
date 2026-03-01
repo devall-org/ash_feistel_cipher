@@ -6,7 +6,7 @@
 
 - **`bits` option renamed to `data_bits`** (default changed from 52 to 38)
 - **New DSL options**: `time_bits` (default: 15), `time_bucket` (default: 86400), `encrypt_time` (default: false)
-- **Depends on `feistel_cipher ~> 1.0`** (PG functions use `_v1` suffix)
+- **Depends on `feistel_cipher 1.0.0`** (PG functions use `_v1` suffix)
 
 ### Steps
 
@@ -30,7 +30,7 @@ If `bits` was not specified (default was 52), add `time_bits: 0, data_bits: 52` 
 mix ash_feistel_cipher.upgrade
 ```
 
-This composes `feistel_cipher.upgrade` to generate an Ecto migration template. Edit the generated migration to fill in your `functions_salt` and trigger details. See [feistel_cipher UPGRADE.md](https://github.com/devall-org/feistel_cipher/blob/main/UPGRADE.md) for details.
+This composes `feistel_cipher.upgrade` to generate an Ecto migration template. Edit the generated migration to fill in your `functions_salt` and trigger details. See [feistel_cipher UPGRADE.md](https://github.com/devall-org/feistel_cipher/blob/v1.0.0/UPGRADE.md) for details.
 
 3. **Regenerate Ash migrations**:
 
@@ -44,6 +44,6 @@ In the generated migration's `up` function, replace `down_for_trigger` (or `down
 
 ## From v0.13.x or earlier to v1.0.0
 
-The `feistel_cipher` dependency changed its cipher algorithm in v0.14.0 (HMAC-SHA256 hardening), so encryption results are different from v0.13.x and earlier. See [feistel_cipher UPGRADE.md](https://github.com/devall-org/feistel_cipher/blob/main/UPGRADE.md#from-v013x-or-earlier-to-v100) for details on compatibility.
+The `feistel_cipher` dependency changed its cipher algorithm in v0.14.0 (HMAC-SHA256 hardening), so encryption results are different from v0.13.x and earlier. See [feistel_cipher UPGRADE.md](https://github.com/devall-org/feistel_cipher/blob/v1.0.0/UPGRADE.md#from-v013x-or-earlier-to-v100) for details on compatibility.
 
 The DSL upgrade steps are the same as above.

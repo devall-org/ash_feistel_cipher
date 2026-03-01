@@ -94,7 +94,7 @@ encrypted_integer :referral_code, from: :seq, key: 12345
 Shorthand for primary keys (automatically sets `primary_key?: true`, `allow_nil?: false`, `public?: true`):
 ```elixir
 encrypted_integer_primary_key :id, from: :seq
-encrypted_integer_primary_key :id, from: :seq, bits: 40
+encrypted_integer_primary_key :id, from: :seq, time_bits: 0, data_bits: 40
 ```
 
 ## Configuration Options
@@ -104,7 +104,10 @@ encrypted_integer_primary_key :id, from: :seq, bits: 40
 
 ### Optional
 ⚠️ **Treat changes as explicit migrations**:
-- `bits` (default: 52): Encryption bit size. Determines ID range (40 bits = ~1 trillion, 52 bits = ~4.5 quadrillion)
+- `time_bits` (default: 15): Time prefix bits. Set to `0` for v0.x-compatible behavior.
+- `time_bucket` (default: 86400): Time bucket size in seconds.
+- `encrypt_time` (default: false): Whether to encrypt the time prefix.
+- `data_bits` (default: 38): Data encryption bit size. Must be even.
 - `key`: Encryption key (auto-generated from table/column names if not provided)
 - `rounds` (default: 16): Number of Feistel rounds (higher = more secure but slower)
 - `functions_prefix` (default: "public"): PostgreSQL schema where feistel functions are installed
@@ -114,7 +117,8 @@ encrypted_integer_primary_key :id, from: :seq, bits: 40
 ```elixir
 encrypted_integer_primary_key :id, 
   from: :seq,
-  bits: 40  # ~1 trillion ID range
+  time_bits: 0,
+  data_bits: 40  # ~1 trillion ID range
 ```
 
 ## Important Rules
@@ -153,7 +157,10 @@ end
 ### Migration Required For Parameter Changes
 
 These options should be treated as immutable in-place once records exist:
-- `bits`
+- `time_bits`
+- `time_bucket`
+- `encrypt_time`
+- `data_bits`
 - `key`
 - `rounds`
 
@@ -188,7 +195,8 @@ def up do
 
   execute(
     FeistelCipher.up_for_trigger("public", "posts", "seq", "id",
-      bits: 52,
+      time_bits: 0,
+      data_bits: 52,
       key: 1_984_253_769,
       rounds: 16,
       functions_prefix: "public"
@@ -247,4 +255,12 @@ Don't expose sequential IDs directly:
 
 ### Changing Encryption Settings
 
-Cannot change `bits`, `key`, `rounds` after records are created. Requires data migration to change.
+Cannot change `time_bits`, `time_bucket`, `encrypt_time`, `data_bits`, `key`, or `rounds` after records are created. Requires data migration to change.
+
+## Upgrading to v1.0.0
+
+- `ash_feistel_cipher` and this guide now target `feistel_cipher 1.0.0`.
+- Replace legacy `bits: N` with `time_bits: 0, data_bits: N` in resource DSL.
+- Run `mix ash_feistel_cipher.upgrade` to generate SQL function migration scaffolding.
+- Run `mix ash.codegen --name upgrade_feistel_triggers_to_v1` and apply trigger updates.
+- For full upstream details, see [feistel_cipher v1.0.0 UPGRADE.md](https://github.com/devall-org/feistel_cipher/blob/v1.0.0/UPGRADE.md).

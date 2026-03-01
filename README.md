@@ -16,6 +16,8 @@ Sequential IDs (1, 2, 3...) leak business information. This library provides a d
 
 > For detailed information about the Feistel cipher algorithm, how it works, security properties, and performance benchmarks, see the [feistel_cipher](https://github.com/devall-org/feistel_cipher) library documentation.
 
+This package currently depends on `feistel_cipher 1.0.0`.
+
 ## Installation
 
 ### Using igniter (Recommended)
@@ -58,6 +60,12 @@ If you need more control over the installation process, you can install manually
    mix igniter.install feistel_cipher --repo MyApp.Repo
    ```
 
+   If you need an explicit dependency pin, use:
+
+   ```elixir
+   {:feistel_cipher, "1.0.0"}
+   ```
+
 4. Add `:ash_feistel_cipher` to your formatter configuration in `.formatter.exs`:
 
    ```elixir
@@ -69,6 +77,27 @@ If you need more control over the installation process, you can install manually
 ## Upgrading from v0.x
 
 See [UPGRADE.md](UPGRADE.md) for the migration guide.
+
+For upstream migration context, see [feistel_cipher v1.0.0 UPGRADE.md](https://github.com/devall-org/feistel_cipher/blob/v1.0.0/UPGRADE.md).
+
+## Releasing to Hex
+
+1. Ensure package metadata and docs are current:
+   ```bash
+   mix format
+   mix test
+   mix docs
+   mix hex.build
+   ```
+2. Verify Hex auth locally (one-time per machine):
+   ```bash
+   mix hex.user auth
+   ```
+3. Publish:
+   ```bash
+   mix hex.publish
+   ```
+
 
 ## Usage
 
