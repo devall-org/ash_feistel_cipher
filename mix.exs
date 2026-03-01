@@ -16,7 +16,7 @@ defmodule AshFeistelCipher.MixProject do
       homepage_url: "https://github.com/devall-org/ash_feistel_cipher",
       docs: [
         main: "readme",
-        extras: ["README.md"]
+        extras: ["README.md", "UPGRADE.md", "usage-rules.md"]
       ]
     ]
   end
@@ -35,7 +35,7 @@ defmodule AshFeistelCipher.MixProject do
   defp deps do
     [
       {:igniter, "~> 0.6", optional: true},
-      {:feistel_cipher, github: "devall-org/feistel_cipher", branch: "main"},
+      {:feistel_cipher, "1.0.0"},
       {:ash, "~> 3.0"},
       {:ash_postgres, "~> 2.0"},
       {:spark, "~> 2.0"},
@@ -49,6 +49,7 @@ defmodule AshFeistelCipher.MixProject do
       name: "ash_feistel_cipher",
       licenses: ["MIT"],
       maintainers: ["Jechol Lee"],
+      files: ["lib", "config", "mix.exs", "README.md", "UPGRADE.md", "usage-rules.md", "LICENSE"],
       links: %{
         "GitHub" => "https://github.com/devall-org/ash_feistel_cipher"
       }

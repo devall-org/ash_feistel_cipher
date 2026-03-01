@@ -14,7 +14,11 @@ Sequential IDs (1, 2, 3...) leak business information. This library provides a d
 - **Automatic encryption**: Database triggers handle encryption transparently
 - **Collision-free**: One-to-one mapping
 
+**Default profile**: `time_bits: 15`, `data_bits: 38`
+
 > For detailed information about the Feistel cipher algorithm, how it works, security properties, and performance benchmarks, see the [feistel_cipher](https://github.com/devall-org/feistel_cipher) library documentation.
+
+This package currently depends on `feistel_cipher 1.0.0`.
 
 ## Installation
 
@@ -58,6 +62,12 @@ If you need more control over the installation process, you can install manually
    mix igniter.install feistel_cipher --repo MyApp.Repo
    ```
 
+   If you need an explicit dependency pin, use:
+
+   ```elixir
+   {:feistel_cipher, "1.0.0"}
+   ```
+
 4. Add `:ash_feistel_cipher` to your formatter configuration in `.formatter.exs`:
 
    ```elixir
@@ -68,7 +78,9 @@ If you need more control over the installation process, you can install manually
 
 ## Upgrading from v0.x
 
-See [UPGRADE.md](UPGRADE.md) for the migration guide.
+See [UPGRADE.md](UPGRADE.md) for the project migration guide.
+If you need upstream details, refer to [feistel_cipher v1.0.0 UPGRADE.md](https://github.com/devall-org/feistel_cipher/blob/v1.0.0/UPGRADE.md).
+
 
 ## Usage
 

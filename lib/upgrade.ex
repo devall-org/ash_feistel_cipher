@@ -2,7 +2,7 @@ defmodule Mix.Tasks.AshFeistelCipher.Upgrade.Docs do
   @moduledoc false
 
   def short_doc do
-    "Generate a migration to upgrade FeistelCipher from v0.x to v1.0"
+    "Generate a migration to upgrade FeistelCipher from v0.x to v1.0.0"
   end
 
   def example do
@@ -13,7 +13,7 @@ defmodule Mix.Tasks.AshFeistelCipher.Upgrade.Docs do
     """
     #{short_doc()}
 
-    Generates an Ecto migration that upgrades the PostgreSQL functions from v0.x to v1.0.
+    Generates an Ecto migration that upgrades the PostgreSQL functions from v0.x to v1.0.0.
     This composes `feistel_cipher.upgrade` with the same options.
 
     **Note**: Before running this task, you must manually update your Ash resource DSL
