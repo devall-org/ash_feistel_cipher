@@ -23,7 +23,12 @@ defmodule AshFeistelCipher.Transformer do
   end
 
   defp add_feistel_cipher_trigger(attribute, dsl_state) do
-    opts = Map.get(attribute, :__feistel_cipher__)
+    opts =
+      AshFeistelCipher.feistel_default_options()
+      |> Map.merge(Map.get(attribute, :__feistel_cipher__, %{}), fn _key, default, value ->
+        if is_nil(value), do: default, else: value
+      end)
+
     from_attr = opts.from
     to_attr = attribute.name
     time_bits = opts.time_bits
@@ -39,16 +44,8 @@ defmodule AshFeistelCipher.Transformer do
     to_column = get_db_column_name(to_attr, dsl_state)
 
     table = dsl_state |> Transformer.get_option([:postgres], :table)
-    prefix = dsl_state |> Transformer.get_option([:postgres], :schema) || "public"
+    prefix = dsl_state |> Transformer.get_option([:postgres], :schema, "public")
 
-    # Apply defaults at compile time
-    time_bits = time_bits || 15
-    time_bucket = time_bucket || 86400
-    time_offset = time_offset || 0
-    encrypt_time = if is_nil(encrypt_time), do: false, else: encrypt_time
-    data_bits = data_bits || 38
-    rounds = rounds || 16
-    functions_prefix = functions_prefix || "public"
     key = key || FeistelCipher.generate_key(prefix, table, from_column, to_column)
 
     # Format key with underscores for readability
