@@ -1,9 +1,12 @@
 defmodule AshFeistelCipher do
+  @backfill_sentinel -1
+
   defmodule EncryptedIntegerAttribute do
     @moduledoc false
     # Feistel-specific fields
     @feistel_fields [
       :from,
+      :backfill?,
       :time_bits,
       :time_bucket,
       :time_offset,
@@ -46,53 +49,74 @@ defmodule AshFeistelCipher do
   }
 
   def transform(%EncryptedIntegerAttribute{} = entity) do
-    # Extract feistel-specific options
-    from = entity.from
-    time_bits = entity.time_bits
-    time_bucket = entity.time_bucket
-    time_offset = entity.time_offset
-    encrypt_time = entity.encrypt_time
-    data_bits = entity.data_bits
-    key = entity.key
-    rounds = entity.rounds
-    functions_prefix = entity.functions_prefix
+    with :ok <- validate_default(entity) do
+      # Extract feistel-specific options
+      from = entity.from
+      backfill? = entity.backfill?
+      time_bits = entity.time_bits
+      time_bucket = entity.time_bucket
+      time_offset = entity.time_offset
+      encrypt_time = entity.encrypt_time
+      data_bits = entity.data_bits
+      key = entity.key
+      rounds = entity.rounds
+      functions_prefix = entity.functions_prefix
 
-    # Convert EncryptedIntegerAttribute struct to a map with Ash.Resource.Attribute fields
-    ash_attr_map =
-      entity
-      |> Map.from_struct()
-      |> Map.drop([
-        :from,
-        :time_bits,
-        :time_bucket,
-        :time_offset,
-        :encrypt_time,
-        :data_bits,
-        :key,
-        :rounds,
-        :functions_prefix
-      ])
-      |> Map.update(:constraints, [], fn val -> val || [] end)
+      entity = %{entity | default: @backfill_sentinel}
 
-    # Run the standard Ash attribute transform
-    with {:ok, attribute_map} <- Ash.Resource.Attribute.transform(ash_attr_map) do
-      # Convert to struct and add our marker and store feistel options
-      attribute_struct = struct!(Ash.Resource.Attribute, attribute_map)
+      # Convert EncryptedIntegerAttribute struct to a map with Ash.Resource.Attribute fields
+      ash_attr_map =
+        entity
+        |> Map.from_struct()
+        |> Map.drop([
+          :from,
+          :backfill?,
+          :time_bits,
+          :time_bucket,
+          :time_offset,
+          :encrypt_time,
+          :data_bits,
+          :key,
+          :rounds,
+          :functions_prefix
+        ])
+        |> Map.update(:constraints, [], fn val -> val || [] end)
 
-      {:ok,
-       attribute_struct
-       |> Map.put(:__feistel_cipher__, %{
-         from: from,
-         time_bits: time_bits,
-         time_bucket: time_bucket,
-         time_offset: time_offset,
-         encrypt_time: encrypt_time,
-         data_bits: data_bits,
-         key: key,
-         rounds: rounds,
-         functions_prefix: functions_prefix
-       })}
+      # Run the standard Ash attribute transform
+      with {:ok, attribute_map} <- Ash.Resource.Attribute.transform(ash_attr_map) do
+        # Convert to struct and add our marker and store feistel options
+        attribute_struct = struct!(Ash.Resource.Attribute, attribute_map)
+
+        {:ok,
+         attribute_struct
+         |> Map.put(:__feistel_cipher__, %{
+           from: from,
+           backfill?: backfill?,
+           time_bits: time_bits,
+           time_bucket: time_bucket,
+           time_offset: time_offset,
+           encrypt_time: encrypt_time,
+           data_bits: data_bits,
+           key: key,
+           rounds: rounds,
+           functions_prefix: functions_prefix
+         })}
+      end
     end
+  end
+
+  defp validate_default(%EncryptedIntegerAttribute{default: nil}), do: :ok
+
+  defp validate_default(%EncryptedIntegerAttribute{name: name}) do
+    {:error,
+     Spark.Error.DslError.exception(
+       message: """
+       `default:` is not supported for `encrypted_integer` because its value is generated from `from:`.
+
+       Remove `default:` from `#{name}`. `encrypted_integer` uses an internal sentinel automatically.
+       """,
+       path: [:attributes, name]
+     )}
   end
 
   # Common Feistel cipher options shared by all encrypted integer types
@@ -102,6 +126,12 @@ defmodule AshFeistelCipher do
       required: true,
       doc:
         "Integer attribute to encrypt. Can be any integer attribute. Use `integer_sequence` for an auto-generated bigserial column, or use any regular integer attribute."
+    ],
+    backfill?: [
+      type: :boolean,
+      default: true,
+      doc:
+        "Whether to add migration SQL that backfills existing rows when adding a new encrypted column. Disable this only when you intentionally want to skip backfill."
     ],
     time_bits: [
       type: :integer,

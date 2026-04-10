@@ -89,7 +89,10 @@ Encrypted integer column (automatically sets `writable?: false`, `generated?: tr
 ```elixir
 encrypted_integer :id, from: :seq, primary_key?: true
 encrypted_integer :referral_code, from: :seq, key: 12345
+encrypted_integer :public_id, from: :seq, allow_nil?: true
 ```
+
+`default:` is not supported for `encrypted_integer`. Values are generated from `from:`, and `encrypted_integer` always uses an internal sentinel to avoid `bigserial` generation.
 
 ### `encrypted_integer_primary_key`
 
@@ -113,6 +116,7 @@ encrypted_integer_primary_key :id, from: :seq, time_bits: 15, data_bits: 38
 - `key`: Encryption key (auto-generated from table/column names if not provided)
 - `rounds` (default: 16): Number of Feistel rounds (higher = more secure but slower)
 - `functions_prefix` (default: "public"): PostgreSQL schema where feistel functions are installed
+- `backfill?` (default: true): Backfill existing rows when adding a new encrypted column. Set `backfill?: false` to leave existing rows at the internal sentinel value until you handle them explicitly.
 
 ### Custom Bit Size Example
 
@@ -259,11 +263,11 @@ Don't expose sequential IDs directly:
 
 Cannot change `time_bits`, `time_bucket`, `encrypt_time`, `data_bits`, `key`, or `rounds` after records are created. Requires data migration to change.
 
-## Upgrading to v1.0.0
+## Upgrading to v1.1.0
 
-- `ash_feistel_cipher` and this guide now target `feistel_cipher 1.0.0`.
+- `ash_feistel_cipher 1.1.0` and this guide now target `feistel_cipher 1.1.0`.
 - Keep the default profile as `time_bits: 15`, `data_bits: 38` for new resources.
 - Replace legacy `bits: N` with `time_bits: 0, data_bits: N` in resource DSL.
 - Run `mix ash_feistel_cipher.upgrade` to generate SQL function migration scaffolding.
 - Run `mix ash.codegen --name upgrade_feistel_triggers_to_v1` and apply trigger updates.
-- For full upstream details, see [feistel_cipher v1.0.0 UPGRADE.md](https://github.com/devall-org/feistel_cipher/blob/v1.0.0/UPGRADE.md).
+- For full upstream details, see [feistel_cipher v1.1.0 UPGRADE.md](https://github.com/devall-org/feistel_cipher/blob/v1.1.0/UPGRADE.md).

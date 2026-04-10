@@ -36,6 +36,7 @@ defmodule AshFeistelCipher.Transformer do
     time_offset = opts.time_offset
     encrypt_time = opts.encrypt_time
     data_bits = opts.data_bits
+    backfill? = opts.backfill?
     key = opts.key
     rounds = opts.rounds
     functions_prefix = opts.functions_prefix
@@ -72,18 +73,55 @@ defmodule AshFeistelCipher.Transformer do
     )
     """
 
-    {:ok, statement} =
+    {:ok, trigger_statement} =
       Transformer.build_entity(
         AshPostgres.DataLayer,
         [:postgres, :custom_statements],
         :statement,
-        name: :feistel_cipher,
+        name: custom_statement_name(:feistel_cipher_trigger, from_attr, to_attr),
         code?: true,
         up: up,
         down: down
       )
 
-    dsl_state |> Transformer.add_entity([:postgres, :custom_statements], statement, type: :append)
+    dsl_state =
+      dsl_state
+      |> Transformer.add_entity([:postgres, :custom_statements], trigger_statement, type: :append)
+
+    if backfill? do
+      backfill_up = """
+      execute(
+        FeistelCipher.backfill_for_v1_column(#{inspect(prefix)}, #{inspect(table)}, #{inspect(from_column)}, #{inspect(to_column)},
+          time_bits: #{time_bits},
+          time_bucket: #{time_bucket},
+          time_offset: #{time_offset},
+          encrypt_time: #{encrypt_time},
+          data_bits: #{data_bits},
+          key: #{key_formatted},
+          rounds: #{rounds},
+          functions_prefix: #{inspect(functions_prefix)}
+        )
+      )
+      """
+
+      {:ok, backfill_statement} =
+        Transformer.build_entity(
+          AshPostgres.DataLayer,
+          [:postgres, :custom_statements],
+          :statement,
+          name: custom_statement_name(:feistel_cipher_backfill, from_attr, to_attr),
+          code?: true,
+          up: backfill_up,
+          down: ""
+        )
+
+      dsl_state
+      |> Transformer.add_entity([:postgres, :custom_statements], backfill_statement,
+        type: :append
+      )
+    else
+      dsl_state
+    end
   end
 
   defp get_db_column_name(attr_name, dsl_state) do
@@ -101,5 +139,9 @@ defmodule AshFeistelCipher.Transformer do
     |> Enum.chunk_every(3)
     |> Enum.join("_")
     |> String.reverse()
+  end
+
+  defp custom_statement_name(base_name, from_attr, to_attr) do
+    :"#{base_name}_#{from_attr}_to_#{to_attr}"
   end
 end

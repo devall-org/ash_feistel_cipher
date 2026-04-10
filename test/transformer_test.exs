@@ -2,20 +2,44 @@ defmodule AshFeistelCipher.TransformerTest do
   use ExUnit.Case, async: true
 
   # Helper to get custom statements from a resource
-  defp get_custom_statements(resource) do
+  defp get_custom_statements(resource, name \\ :feistel_cipher_trigger_seq_to_id) do
     resource
     |> AshPostgres.DataLayer.Info.custom_statements()
-    |> Enum.filter(&(&1.name == :feistel_cipher))
+    |> Enum.filter(&(&1.name == name))
+  end
+
+  defp get_custom_statements_by_prefix(resource, name_prefix) do
+    resource
+    |> AshPostgres.DataLayer.Info.custom_statements()
+    |> Enum.filter(fn statement ->
+      statement.name
+      |> Atom.to_string()
+      |> String.starts_with?(Atom.to_string(name_prefix))
+    end)
+  end
+
+  defp get_trigger_statements_by_prefix(resource, name_prefix) do
+    resource
+    |> get_custom_statements_by_prefix(name_prefix)
+    |> Enum.reject(fn statement ->
+      statement.name
+      |> Atom.to_string()
+      |> String.starts_with?("#{name_prefix}_backfill")
+    end)
   end
 
   describe "transform/1 - basic functionality" do
     test "transforms single encrypt configuration into custom_statement" do
-      statements = get_custom_statements(AshFeistelCipher.Test.ValidResource)
+      statements =
+        get_trigger_statements_by_prefix(
+          AshFeistelCipher.Test.ValidResource,
+          :feistel_cipher_trigger
+        )
 
       assert length(statements) == 1
       [statement] = statements
 
-      assert statement.name == :feistel_cipher
+      assert statement.name == :feistel_cipher_trigger_seq_to_id
       assert statement.code? == true
       assert statement.up != nil
       assert statement.down != nil
@@ -44,7 +68,11 @@ defmodule AshFeistelCipher.TransformerTest do
     end
 
     test "transforms multiple encrypt configurations" do
-      statements = get_custom_statements(AshFeistelCipher.Test.MultipleEncryptsResource)
+      statements =
+        get_trigger_statements_by_prefix(
+          AshFeistelCipher.Test.MultipleEncryptsResource,
+          :feistel_cipher_trigger
+        )
 
       assert length(statements) == 2
 
@@ -69,7 +97,11 @@ defmodule AshFeistelCipher.TransformerTest do
 
   describe "transform/1 - custom configurations" do
     test "applies custom bits configuration" do
-      statements = get_custom_statements(AshFeistelCipher.Test.CustomBitsResource)
+      statements =
+        get_trigger_statements_by_prefix(
+          AshFeistelCipher.Test.CustomBitsResource,
+          :feistel_cipher_trigger
+        )
 
       assert length(statements) == 1
       [statement] = statements
@@ -78,7 +110,11 @@ defmodule AshFeistelCipher.TransformerTest do
     end
 
     test "applies custom key configuration" do
-      statements = get_custom_statements(AshFeistelCipher.Test.CustomKeyResource)
+      statements =
+        get_trigger_statements_by_prefix(
+          AshFeistelCipher.Test.CustomKeyResource,
+          :feistel_cipher_trigger
+        )
 
       assert length(statements) == 1
       [statement] = statements
@@ -87,7 +123,11 @@ defmodule AshFeistelCipher.TransformerTest do
     end
 
     test "applies custom rounds configuration" do
-      statements = get_custom_statements(AshFeistelCipher.Test.CustomRoundsResource)
+      statements =
+        get_trigger_statements_by_prefix(
+          AshFeistelCipher.Test.CustomRoundsResource,
+          :feistel_cipher_trigger
+        )
 
       assert length(statements) == 1
       [statement] = statements
@@ -97,7 +137,11 @@ defmodule AshFeistelCipher.TransformerTest do
     end
 
     test "applies custom time_offset configuration" do
-      statements = get_custom_statements(AshFeistelCipher.Test.CustomTimeOffsetResource)
+      statements =
+        get_trigger_statements_by_prefix(
+          AshFeistelCipher.Test.CustomTimeOffsetResource,
+          :feistel_cipher_trigger
+        )
 
       assert length(statements) == 1
       [statement] = statements
@@ -107,7 +151,11 @@ defmodule AshFeistelCipher.TransformerTest do
     end
 
     test "uses default rounds (16) when not specified" do
-      statements = get_custom_statements(AshFeistelCipher.Test.ValidResource)
+      statements =
+        get_trigger_statements_by_prefix(
+          AshFeistelCipher.Test.ValidResource,
+          :feistel_cipher_trigger
+        )
 
       assert length(statements) == 1
       [statement] = statements
@@ -117,7 +165,11 @@ defmodule AshFeistelCipher.TransformerTest do
     end
 
     test "applies custom functions_prefix configuration" do
-      statements = get_custom_statements(AshFeistelCipher.Test.CustomFunctionsPrefixResource)
+      statements =
+        get_trigger_statements_by_prefix(
+          AshFeistelCipher.Test.CustomFunctionsPrefixResource,
+          :feistel_cipher_trigger
+        )
 
       assert length(statements) == 1
       [statement] = statements
@@ -127,7 +179,11 @@ defmodule AshFeistelCipher.TransformerTest do
     end
 
     test "applies custom postgres schema configuration" do
-      statements = get_custom_statements(AshFeistelCipher.Test.CustomSchemaResource)
+      statements =
+        get_trigger_statements_by_prefix(
+          AshFeistelCipher.Test.CustomSchemaResource,
+          :feistel_cipher_trigger
+        )
 
       assert length(statements) == 1
       [statement] = statements
@@ -138,7 +194,11 @@ defmodule AshFeistelCipher.TransformerTest do
     end
 
     test "handles custom source attribute names (DB column mapping)" do
-      statements = get_custom_statements(AshFeistelCipher.Test.CustomSourceResource)
+      statements =
+        get_trigger_statements_by_prefix(
+          AshFeistelCipher.Test.CustomSourceResource,
+          :feistel_cipher_trigger
+        )
 
       assert length(statements) == 1
       [statement] = statements
@@ -151,7 +211,11 @@ defmodule AshFeistelCipher.TransformerTest do
     end
 
     test "passes default time options when time_bits is 0" do
-      statements = get_custom_statements(AshFeistelCipher.Test.TimeBitsZeroResource)
+      statements =
+        get_trigger_statements_by_prefix(
+          AshFeistelCipher.Test.TimeBitsZeroResource,
+          :feistel_cipher_trigger
+        )
 
       assert length(statements) == 1
       [statement] = statements
@@ -165,7 +229,11 @@ defmodule AshFeistelCipher.TransformerTest do
 
   describe "down SQL generation" do
     test "generates down SQL with function call" do
-      statements = get_custom_statements(AshFeistelCipher.Test.ValidResource)
+      statements =
+        get_trigger_statements_by_prefix(
+          AshFeistelCipher.Test.ValidResource,
+          :feistel_cipher_trigger
+        )
 
       assert length(statements) == 1
       [statement] = statements
@@ -178,7 +246,11 @@ defmodule AshFeistelCipher.TransformerTest do
     end
 
     test "down SQL for all triggers for multiple encrypts" do
-      statements = get_custom_statements(AshFeistelCipher.Test.MultipleEncryptsResource)
+      statements =
+        get_trigger_statements_by_prefix(
+          AshFeistelCipher.Test.MultipleEncryptsResource,
+          :feistel_cipher_trigger
+        )
 
       assert length(statements) == 2
 
@@ -189,9 +261,83 @@ defmodule AshFeistelCipher.TransformerTest do
     end
   end
 
+  describe "backfill?" do
+    test "adds backfill custom statement by default" do
+      trigger_statements =
+        get_trigger_statements_by_prefix(
+          AshFeistelCipher.Test.ValidResource,
+          :feistel_cipher_trigger
+        )
+
+      backfill_statements =
+        get_custom_statements(
+          AshFeistelCipher.Test.ValidResource,
+          :feistel_cipher_backfill_seq_to_id
+        )
+
+      assert length(trigger_statements) == 1
+      assert length(backfill_statements) == 1
+
+      [backfill_statement] = backfill_statements
+
+      assert backfill_statement.up =~ "FeistelCipher.backfill_for_v1_column"
+      assert backfill_statement.up =~ ":id"
+      assert backfill_statement.down == ""
+    end
+
+    test "adds backfill custom statement after trigger statement" do
+      trigger_statements =
+        get_custom_statements(
+          AshFeistelCipher.Test.BackfillExistingResource,
+          :feistel_cipher_trigger_seq_to_id_10
+        )
+
+      backfill_statements =
+        get_custom_statements(
+          AshFeistelCipher.Test.BackfillExistingResource,
+          :feistel_cipher_backfill_seq_to_id_10
+        )
+
+      assert length(trigger_statements) == 1
+      assert length(backfill_statements) == 1
+
+      [trigger_statement] = trigger_statements
+      [backfill_statement] = backfill_statements
+
+      assert trigger_statement.up =~ "FeistelCipher.up_for_v1_trigger"
+      assert backfill_statement.up =~ "FeistelCipher.backfill_for_v1_column"
+      assert backfill_statement.up =~ ":id_10"
+      assert backfill_statement.up =~ "time_bits: 0"
+      assert backfill_statement.up =~ "data_bits: 32"
+      refute backfill_statement.up =~ "backfill_sentinel"
+      assert backfill_statement.down == ""
+    end
+
+    test "does not add backfill custom statement when disabled" do
+      trigger_statements =
+        get_trigger_statements_by_prefix(
+          AshFeistelCipher.Test.NoBackfillResource,
+          :feistel_cipher_trigger
+        )
+
+      backfill_statements =
+        get_custom_statements(
+          AshFeistelCipher.Test.NoBackfillResource,
+          :feistel_cipher_backfill_seq_to_id
+        )
+
+      assert length(trigger_statements) == 1
+      assert backfill_statements == []
+    end
+  end
+
   describe "integration with FeistelCipher" do
     test "uses correct encryption key generation" do
-      statements = get_custom_statements(AshFeistelCipher.Test.ValidResource)
+      statements =
+        get_trigger_statements_by_prefix(
+          AshFeistelCipher.Test.ValidResource,
+          :feistel_cipher_trigger
+        )
 
       [statement] = statements
 
@@ -206,7 +352,11 @@ defmodule AshFeistelCipher.TransformerTest do
     end
 
     test "preserves custom key when provided" do
-      statements = get_custom_statements(AshFeistelCipher.Test.CustomKeyResource)
+      statements =
+        get_trigger_statements_by_prefix(
+          AshFeistelCipher.Test.CustomKeyResource,
+          :feistel_cipher_trigger
+        )
 
       [statement] = statements
 
@@ -225,7 +375,11 @@ defmodule AshFeistelCipher.TransformerTest do
 
   describe "encrypted_integer_primary_key" do
     test "sets primary_key, allow_nil, and public defaults" do
-      statements = get_custom_statements(AshFeistelCipher.Test.PrimaryKeyResource)
+      statements =
+        get_trigger_statements_by_prefix(
+          AshFeistelCipher.Test.PrimaryKeyResource,
+          :feistel_cipher_trigger
+        )
 
       assert length(statements) == 1
       [statement] = statements
@@ -247,7 +401,11 @@ defmodule AshFeistelCipher.TransformerTest do
     end
 
     test "allows overriding encryption options (data_bits, key, rounds)" do
-      statements = get_custom_statements(AshFeistelCipher.Test.PrimaryKeyCustomOptionsResource)
+      statements =
+        get_trigger_statements_by_prefix(
+          AshFeistelCipher.Test.PrimaryKeyCustomOptionsResource,
+          :feistel_cipher_trigger
+        )
 
       assert length(statements) == 1
       [statement] = statements

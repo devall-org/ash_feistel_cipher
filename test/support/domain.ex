@@ -15,5 +15,7 @@ defmodule AshFeistelCipher.Test.Domain do
     resource AshFeistelCipher.Test.TimeBitsZeroResource
     resource AshFeistelCipher.Test.PrimaryKeyCustomOptionsResource
     resource AshFeistelCipher.Test.CustomTimeOffsetResource
+    resource AshFeistelCipher.Test.BackfillExistingResource
+    resource AshFeistelCipher.Test.NoBackfillResource
   end
 end
