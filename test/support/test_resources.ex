@@ -12,7 +12,13 @@ defmodule AshFeistelCipher.Test.ValidResource do
 
   attributes do
     integer_sequence :seq
-    encrypted_integer :id, from: :seq, primary_key?: true, allow_nil?: false, public?: true
+
+    encrypted_integer :id,
+      from: :seq,
+      primary_key?: true,
+      allow_nil?: false,
+      public?: true
+
     attribute :name, :string
   end
 end
@@ -39,7 +45,11 @@ defmodule AshFeistelCipher.Test.MultipleEncryptsResource do
       allow_nil?: false,
       public?: true
 
-    encrypted_integer :referral_code, from: :seq, data_bits: 38, key: 12345
+    encrypted_integer :referral_code,
+      from: :seq,
+      data_bits: 38,
+      key: 12345
+
     attribute :name, :string
   end
 end
@@ -106,7 +116,10 @@ defmodule AshFeistelCipher.Test.CustomSourceResource do
 
   attributes do
     attribute :sequence_number, :integer, primary_key?: true, allow_nil?: false, source: :seq_num
-    encrypted_integer :encrypted_id, from: :sequence_number, source: :enc_id
+
+    encrypted_integer :encrypted_id,
+      from: :sequence_number,
+      source: :enc_id
   end
 end
 
@@ -149,7 +162,11 @@ defmodule AshFeistelCipher.Test.CustomSchemaResource do
 
   attributes do
     integer_sequence :seq
-    encrypted_integer :id, from: :seq, allow_nil?: false, primary_key?: true
+
+    encrypted_integer :id,
+      from: :seq,
+      allow_nil?: false,
+      primary_key?: true
   end
 end
 
@@ -234,7 +251,61 @@ defmodule AshFeistelCipher.Test.PrimaryKeyCustomOptionsResource do
 
   attributes do
     integer_sequence :seq
-    encrypted_integer_primary_key :id, from: :seq, data_bits: 38, key: 12345, rounds: 8
+
+    encrypted_integer_primary_key :id,
+      from: :seq,
+      data_bits: 38,
+      key: 12345,
+      rounds: 8
+
     attribute :name, :string
+  end
+end
+
+defmodule AshFeistelCipher.Test.NoBackfillResource do
+  @moduledoc false
+  use Ash.Resource,
+    domain: AshFeistelCipher.Test.Domain,
+    data_layer: AshPostgres.DataLayer,
+    extensions: [AshFeistelCipher]
+
+  postgres do
+    table "no_backfill_resources"
+    repo AshFeistelCipher.Test.Repo
+  end
+
+  attributes do
+    integer_sequence :seq
+
+    encrypted_integer :id,
+      from: :seq,
+      backfill?: false,
+      primary_key?: true,
+      allow_nil?: false,
+      public?: true
+  end
+end
+
+defmodule AshFeistelCipher.Test.BackfillExistingResource do
+  @moduledoc false
+  use Ash.Resource,
+    domain: AshFeistelCipher.Test.Domain,
+    data_layer: AshPostgres.DataLayer,
+    extensions: [AshFeistelCipher]
+
+  postgres do
+    table "backfill_existing_resources"
+    repo AshFeistelCipher.Test.Repo
+  end
+
+  attributes do
+    attribute :id, :integer, primary_key?: true, allow_nil?: false
+    integer_sequence :seq
+
+    encrypted_integer :id_10,
+      from: :seq,
+      data_bits: 32,
+      time_bits: 0,
+      allow_nil?: true
   end
 end

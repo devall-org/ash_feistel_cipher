@@ -18,7 +18,7 @@ Sequential IDs (1, 2, 3...) leak business information. This library provides a d
 
 > For detailed information about the Feistel cipher algorithm, how it works, security properties, and performance benchmarks, see the [feistel_cipher](https://github.com/devall-org/feistel_cipher) library documentation.
 
-This package currently depends on `feistel_cipher 1.0.0`.
+This package currently depends on `feistel_cipher 1.1.0`.
 
 ## Installation
 
@@ -45,7 +45,7 @@ If you need more control over the installation process, you can install manually
    ```elixir
    def deps do
      [
-       {:ash_feistel_cipher, "~> 1.0.1"}
+       {:ash_feistel_cipher, "~> 1.1"}
      ]
    end
    ```
@@ -65,7 +65,7 @@ If you need more control over the installation process, you can install manually
    If you need an explicit dependency pin, use:
 
    ```elixir
-   {:feistel_cipher, "1.0.0"}
+   {:feistel_cipher, "1.1.0"}
    ```
 
 4. Add `:ash_feistel_cipher` to your formatter configuration in `.formatter.exs`:
@@ -79,7 +79,7 @@ If you need more control over the installation process, you can install manually
 ## Upgrading from v0.x
 
 See [UPGRADE.md](UPGRADE.md) for the project migration guide.
-If you need upstream details, refer to [feistel_cipher v1.0.0 UPGRADE.md](https://github.com/devall-org/feistel_cipher/blob/v1.0.0/UPGRADE.md).
+If you need upstream details, refer to [feistel_cipher v1.1.0 UPGRADE.md](https://github.com/devall-org/feistel_cipher/blob/v1.1.0/UPGRADE.md).
 
 
 ## Usage
@@ -207,6 +207,24 @@ attributes do
 end
 ```
 
+**Backfill existing rows when adding a new encrypted column:**
+```elixir
+attributes do
+  integer_sequence :seq
+
+  encrypted_integer :public_id,
+    from: :seq,
+    data_bits: 32,
+    time_bits: 0,
+    allow_nil?: true
+end
+```
+
+This generates a migration that:
+- adds the column with an internal sentinel default
+- creates the trigger for new rows
+- backfills existing rows using `FeistelCipher.backfill_for_v1_column/5`
+
 ### DSL Reference
 
 **`integer_sequence`**: Auto-incrementing bigserial column
@@ -222,6 +240,8 @@ The base form for encrypted columns. Automatically sets `writable?: false`, `gen
 encrypted_integer :id, from: :seq, primary_key?: true, allow_nil?: false, public?: true
 encrypted_integer :referral_code, from: :seq
 ```
+
+`default:` is not supported for `encrypted_integer`. Values are generated from `from:`, and `encrypted_integer` always uses an internal sentinel to avoid `bigserial` generation.
 
 **`encrypted_integer_primary_key`**: Shorthand for encrypted primary keys
 
@@ -252,6 +272,7 @@ Optional (⚠️ **Treat changes as explicit migrations**):
 - `key`: Custom encryption key (auto-generated from table/column names if not provided)
 - `rounds` (default: 16): Number of Feistel rounds (higher = more secure but slower)
 - `functions_prefix` (default: "public"): PostgreSQL schema where feistel functions are installed
+- `backfill?` (default: true): Backfill existing rows when generating a migration for a new encrypted column. Set `backfill?: false` to leave existing rows at the internal sentinel value until you handle them explicitly.
 
 **Important**: 
 - `allow_nil?` on encrypted column must match `from` attribute's nullability
