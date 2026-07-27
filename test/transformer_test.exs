@@ -2,7 +2,7 @@ defmodule AshFeistelCipher.TransformerTest do
   use ExUnit.Case, async: true
 
   # Helper to get custom statements from a resource
-  defp get_custom_statements(resource, name \\ :feistel_cipher_trigger_seq_to_id) do
+  defp get_custom_statements(resource, name \\ :feistel_cipher_v1_trigger_seq_to_id) do
     resource
     |> AshPostgres.DataLayer.Info.custom_statements()
     |> Enum.filter(&(&1.name == name))
@@ -33,13 +33,13 @@ defmodule AshFeistelCipher.TransformerTest do
       statements =
         get_trigger_statements_by_prefix(
           AshFeistelCipher.Test.ValidResource,
-          :feistel_cipher_trigger
+          :feistel_cipher_v1_trigger
         )
 
       assert length(statements) == 1
       [statement] = statements
 
-      assert statement.name == :feistel_cipher_trigger_seq_to_id
+      assert statement.name == :feistel_cipher_v1_trigger_seq_to_id
       assert statement.code? == true
       assert statement.up != nil
       assert statement.down != nil
@@ -71,7 +71,7 @@ defmodule AshFeistelCipher.TransformerTest do
       statements =
         get_trigger_statements_by_prefix(
           AshFeistelCipher.Test.MultipleEncryptsResource,
-          :feistel_cipher_trigger
+          :feistel_cipher_v1_trigger
         )
 
       assert length(statements) == 2
@@ -100,7 +100,7 @@ defmodule AshFeistelCipher.TransformerTest do
       statements =
         get_trigger_statements_by_prefix(
           AshFeistelCipher.Test.CustomBitsResource,
-          :feistel_cipher_trigger
+          :feistel_cipher_v1_trigger
         )
 
       assert length(statements) == 1
@@ -113,7 +113,7 @@ defmodule AshFeistelCipher.TransformerTest do
       statements =
         get_trigger_statements_by_prefix(
           AshFeistelCipher.Test.CustomKeyResource,
-          :feistel_cipher_trigger
+          :feistel_cipher_v1_trigger
         )
 
       assert length(statements) == 1
@@ -126,7 +126,7 @@ defmodule AshFeistelCipher.TransformerTest do
       statements =
         get_trigger_statements_by_prefix(
           AshFeistelCipher.Test.CustomRoundsResource,
-          :feistel_cipher_trigger
+          :feistel_cipher_v1_trigger
         )
 
       assert length(statements) == 1
@@ -140,7 +140,7 @@ defmodule AshFeistelCipher.TransformerTest do
       statements =
         get_trigger_statements_by_prefix(
           AshFeistelCipher.Test.CustomTimeOffsetResource,
-          :feistel_cipher_trigger
+          :feistel_cipher_v1_trigger
         )
 
       assert length(statements) == 1
@@ -154,7 +154,7 @@ defmodule AshFeistelCipher.TransformerTest do
       statements =
         get_trigger_statements_by_prefix(
           AshFeistelCipher.Test.ValidResource,
-          :feistel_cipher_trigger
+          :feistel_cipher_v1_trigger
         )
 
       assert length(statements) == 1
@@ -168,7 +168,7 @@ defmodule AshFeistelCipher.TransformerTest do
       statements =
         get_trigger_statements_by_prefix(
           AshFeistelCipher.Test.CustomFunctionsPrefixResource,
-          :feistel_cipher_trigger
+          :feistel_cipher_v1_trigger
         )
 
       assert length(statements) == 1
@@ -182,7 +182,7 @@ defmodule AshFeistelCipher.TransformerTest do
       statements =
         get_trigger_statements_by_prefix(
           AshFeistelCipher.Test.CustomSchemaResource,
-          :feistel_cipher_trigger
+          :feistel_cipher_v1_trigger
         )
 
       assert length(statements) == 1
@@ -197,7 +197,7 @@ defmodule AshFeistelCipher.TransformerTest do
       statements =
         get_trigger_statements_by_prefix(
           AshFeistelCipher.Test.CustomSourceResource,
-          :feistel_cipher_trigger
+          :feistel_cipher_v1_trigger
         )
 
       assert length(statements) == 1
@@ -214,7 +214,7 @@ defmodule AshFeistelCipher.TransformerTest do
       statements =
         get_trigger_statements_by_prefix(
           AshFeistelCipher.Test.TimeBitsZeroResource,
-          :feistel_cipher_trigger
+          :feistel_cipher_v1_trigger
         )
 
       assert length(statements) == 1
@@ -232,7 +232,7 @@ defmodule AshFeistelCipher.TransformerTest do
       statements =
         get_trigger_statements_by_prefix(
           AshFeistelCipher.Test.ValidResource,
-          :feistel_cipher_trigger
+          :feistel_cipher_v1_trigger
         )
 
       assert length(statements) == 1
@@ -249,7 +249,7 @@ defmodule AshFeistelCipher.TransformerTest do
       statements =
         get_trigger_statements_by_prefix(
           AshFeistelCipher.Test.MultipleEncryptsResource,
-          :feistel_cipher_trigger
+          :feistel_cipher_v1_trigger
         )
 
       assert length(statements) == 2
@@ -266,13 +266,13 @@ defmodule AshFeistelCipher.TransformerTest do
       trigger_statements =
         get_trigger_statements_by_prefix(
           AshFeistelCipher.Test.ValidResource,
-          :feistel_cipher_trigger
+          :feistel_cipher_v1_trigger
         )
 
       backfill_statements =
         get_custom_statements(
           AshFeistelCipher.Test.ValidResource,
-          :feistel_cipher_backfill_seq_to_id
+          :feistel_cipher_v1_backfill_seq_to_id
         )
 
       assert length(trigger_statements) == 1
@@ -289,13 +289,13 @@ defmodule AshFeistelCipher.TransformerTest do
       trigger_statements =
         get_custom_statements(
           AshFeistelCipher.Test.BackfillExistingResource,
-          :feistel_cipher_trigger_seq_to_id_10
+          :feistel_cipher_v1_trigger_seq_to_id_10
         )
 
       backfill_statements =
         get_custom_statements(
           AshFeistelCipher.Test.BackfillExistingResource,
-          :feistel_cipher_backfill_seq_to_id_10
+          :feistel_cipher_v1_backfill_seq_to_id_10
         )
 
       assert length(trigger_statements) == 1
@@ -317,13 +317,13 @@ defmodule AshFeistelCipher.TransformerTest do
       trigger_statements =
         get_trigger_statements_by_prefix(
           AshFeistelCipher.Test.NoBackfillResource,
-          :feistel_cipher_trigger
+          :feistel_cipher_v1_trigger
         )
 
       backfill_statements =
         get_custom_statements(
           AshFeistelCipher.Test.NoBackfillResource,
-          :feistel_cipher_backfill_seq_to_id
+          :feistel_cipher_v1_backfill_seq_to_id
         )
 
       assert length(trigger_statements) == 1
@@ -336,7 +336,7 @@ defmodule AshFeistelCipher.TransformerTest do
       statements =
         get_trigger_statements_by_prefix(
           AshFeistelCipher.Test.ValidResource,
-          :feistel_cipher_trigger
+          :feistel_cipher_v1_trigger
         )
 
       [statement] = statements
@@ -355,7 +355,7 @@ defmodule AshFeistelCipher.TransformerTest do
       statements =
         get_trigger_statements_by_prefix(
           AshFeistelCipher.Test.CustomKeyResource,
-          :feistel_cipher_trigger
+          :feistel_cipher_v1_trigger
         )
 
       [statement] = statements
@@ -378,7 +378,7 @@ defmodule AshFeistelCipher.TransformerTest do
       statements =
         get_trigger_statements_by_prefix(
           AshFeistelCipher.Test.PrimaryKeyResource,
-          :feistel_cipher_trigger
+          :feistel_cipher_v1_trigger
         )
 
       assert length(statements) == 1
@@ -404,7 +404,7 @@ defmodule AshFeistelCipher.TransformerTest do
       statements =
         get_trigger_statements_by_prefix(
           AshFeistelCipher.Test.PrimaryKeyCustomOptionsResource,
-          :feistel_cipher_trigger
+          :feistel_cipher_v1_trigger
         )
 
       assert length(statements) == 1

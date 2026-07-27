@@ -78,7 +78,7 @@ defmodule AshFeistelCipher.Transformer do
         AshPostgres.DataLayer,
         [:postgres, :custom_statements],
         :statement,
-        name: custom_statement_name(:feistel_cipher_trigger, from_attr, to_attr),
+        name: custom_statement_name(:feistel_cipher_v1_trigger, from_attr, to_attr),
         code?: true,
         up: up,
         down: down
@@ -109,7 +109,7 @@ defmodule AshFeistelCipher.Transformer do
           AshPostgres.DataLayer,
           [:postgres, :custom_statements],
           :statement,
-          name: custom_statement_name(:feistel_cipher_backfill, from_attr, to_attr),
+          name: custom_statement_name(:feistel_cipher_v1_backfill, from_attr, to_attr),
           code?: true,
           up: backfill_up,
           down: ""

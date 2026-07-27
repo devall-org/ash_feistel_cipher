@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.1
+
+- Added the cipher version to generated custom statement names.
+
 ## 1.0.0
 
 - Renamed `bits` to `data_bits`.
