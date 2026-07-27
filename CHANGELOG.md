@@ -1,11 +1,8 @@
 # Changelog
 
-## 1.0.0
+## 1.1.1
 
-- Renamed `bits` to `data_bits`.
-- Added `time_bits`, `time_bucket`, and `encrypt_time` options.
-- Switched to `feistel_cipher` v1 PG function and trigger flow.
-- Recommended new default profile: `time_bits: 15`, `data_bits: 38`.
+- Added the FeistelCipher major version to generated custom statement names.
 
 ## 1.1.0
 
@@ -14,3 +11,10 @@
 - `encrypted_integer` now uses an internal sentinel default to avoid `bigserial` generation.
 - User-provided `default:` is no longer supported for `encrypted_integer`.
 - Generated custom statement names now include both `from` and `to`, which may cause migration and snapshot churn.
+
+## 1.0.0
+
+- Renamed `bits` to `data_bits`.
+- Added `time_bits`, `time_bucket`, and `encrypt_time` options.
+- Switched to `feistel_cipher` v1 PG function and trigger flow.
+- Recommended new default profile: `time_bits: 15`, `data_bits: 38`.

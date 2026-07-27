@@ -45,7 +45,7 @@ If you need more control over the installation process, you can install manually
    ```elixir
    def deps do
      [
-       {:ash_feistel_cipher, "~> 1.1"}
+       {:ash_feistel_cipher, "~> 1.1.1"}
      ]
    end
    ```
