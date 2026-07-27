@@ -2,7 +2,7 @@
 
 ## 1.1.1
 
-- Added the FeistelCipher PostgreSQL API version to generated custom statement names.
+- Added the FeistelCipher major version to generated custom statement names.
 
 ## 1.0.0
 
