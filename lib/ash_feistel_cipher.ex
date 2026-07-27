@@ -1,6 +1,4 @@
 defmodule AshFeistelCipher do
-  @backfill_sentinel -1
-
   defmodule EncryptedIntegerAttribute do
     @moduledoc false
     # Feistel-specific fields
@@ -62,7 +60,10 @@ defmodule AshFeistelCipher do
       rounds = entity.rounds
       functions_prefix = entity.functions_prefix
 
-      entity = %{entity | default: @backfill_sentinel}
+      # The backfill sentinel is applied as a migration-level default only (see
+      # AshFeistelCipher.Transformer). Keeping the Ash attribute default nil ensures
+      # `struct(Resource)` has a nil primary key, so code like `Ash.calculate/3` does
+      # not mistake an in-memory struct for a persisted record.
 
       # Convert EncryptedIntegerAttribute struct to a map with Ash.Resource.Attribute fields
       ash_attr_map =

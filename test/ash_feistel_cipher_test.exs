@@ -20,7 +20,7 @@ defmodule AshFeistelCipherTest do
       assert error.message =~ "Remove `default:` from `id`"
     end
 
-    test "uses internal sentinel when backfill is enabled" do
+    test "keeps attribute default nil when backfill is enabled" do
       entity =
         struct!(EncryptedIntegerAttribute,
           name: :id,
@@ -32,10 +32,10 @@ defmodule AshFeistelCipherTest do
         )
 
       assert {:ok, attribute} = AshFeistelCipher.transform(entity)
-      assert attribute.default == -1
+      assert attribute.default == nil
     end
 
-    test "uses internal sentinel when backfill is disabled" do
+    test "keeps attribute default nil when backfill is disabled" do
       entity =
         struct!(EncryptedIntegerAttribute,
           name: :id,
@@ -47,7 +47,7 @@ defmodule AshFeistelCipherTest do
         )
 
       assert {:ok, attribute} = AshFeistelCipher.transform(entity)
-      assert attribute.default == -1
+      assert attribute.default == nil
     end
   end
 end

@@ -18,7 +18,7 @@ Sequential IDs (1, 2, 3...) leak business information. This library provides a d
 
 > For detailed information about the Feistel cipher algorithm, how it works, security properties, and performance benchmarks, see the [feistel_cipher](https://github.com/devall-org/feistel_cipher) library documentation.
 
-This package currently depends on `feistel_cipher 1.1.0`.
+This package currently depends on `feistel_cipher 1.1.2`.
 
 ## Installation
 
@@ -45,7 +45,7 @@ If you need more control over the installation process, you can install manually
    ```elixir
    def deps do
      [
-       {:ash_feistel_cipher, "~> 1.1.1"}
+       {:ash_feistel_cipher, "~> 1.1.2"}
      ]
    end
    ```
@@ -65,7 +65,7 @@ If you need more control over the installation process, you can install manually
    If you need an explicit dependency pin, use:
 
    ```elixir
-   {:feistel_cipher, "1.1.0"}
+   {:feistel_cipher, "1.1.2"}
    ```
 
 4. Add `:ash_feistel_cipher` to your formatter configuration in `.formatter.exs`:

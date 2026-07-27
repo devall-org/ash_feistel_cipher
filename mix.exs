@@ -4,7 +4,7 @@ defmodule AshFeistelCipher.MixProject do
   def project do
     [
       app: :ash_feistel_cipher,
-      version: "1.1.1",
+      version: "1.1.2",
       elixir: "~> 1.17",
       elixirc_paths: elixirc_paths(Mix.env()),
       consolidate_protocols: Mix.env() not in [:dev, :test],
@@ -35,7 +35,7 @@ defmodule AshFeistelCipher.MixProject do
   defp deps do
     [
       {:igniter, "~> 0.6", optional: true},
-      {:feistel_cipher, "~> 1.1.0"},
+      {:feistel_cipher, "~> 1.1.2"},
       {:ash, "~> 3.0"},
       {:ash_postgres, "~> 2.0"},
       {:spark, "~> 2.0"},

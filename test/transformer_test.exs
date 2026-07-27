@@ -365,6 +365,30 @@ defmodule AshFeistelCipher.TransformerTest do
     end
   end
 
+  describe "backfill sentinel as migration default" do
+    test "injects migration_defaults for encrypted columns" do
+      assert AshPostgres.DataLayer.Info.migration_defaults(AshFeistelCipher.Test.ValidResource) ==
+               [id: "-1"]
+    end
+
+    test "injects migration_defaults for every encrypted column" do
+      migration_defaults =
+        AshPostgres.DataLayer.Info.migration_defaults(
+          AshFeistelCipher.Test.MultipleEncryptsResource
+        )
+
+      assert Keyword.fetch!(migration_defaults, :id) == "-1"
+      assert Keyword.fetch!(migration_defaults, :referral_code) == "-1"
+    end
+
+    test "keeps Ash attribute default and struct default nil" do
+      id_attr = Ash.Resource.Info.attribute(AshFeistelCipher.Test.ValidResource, :id)
+
+      assert id_attr.default == nil
+      assert struct(AshFeistelCipher.Test.ValidResource).id == nil
+    end
+  end
+
   describe "transformer ordering" do
     test "transformer runs before other transformers" do
       # The before?/1 callback should always return true

@@ -87,6 +87,7 @@ defmodule AshFeistelCipher.Transformer do
     dsl_state =
       dsl_state
       |> Transformer.add_entity([:postgres, :custom_statements], trigger_statement, type: :append)
+      |> add_backfill_sentinel_migration_default(to_attr)
 
     if backfill? do
       backfill_up = """
@@ -122,6 +123,21 @@ defmodule AshFeistelCipher.Transformer do
     else
       dsl_state
     end
+  end
+
+  # The sentinel is a migration-level default only: it keeps ash_postgres from
+  # rendering the generated integer column as serial/bigserial and marks
+  # not-yet-encrypted rows for backfill. It must not be an Ash attribute default,
+  # which would leak into `struct(Resource)` as a fake primary key.
+  defp add_backfill_sentinel_migration_default(dsl_state, to_attr) do
+    sentinel = FeistelCipher.backfill_sentinel() |> Integer.to_string()
+
+    migration_defaults =
+      dsl_state
+      |> Transformer.get_option([:postgres], :migration_defaults, [])
+      |> Keyword.put_new(to_attr, sentinel)
+
+    Transformer.set_option(dsl_state, [:postgres], :migration_defaults, migration_defaults)
   end
 
   defp get_db_column_name(attr_name, dsl_state) do
